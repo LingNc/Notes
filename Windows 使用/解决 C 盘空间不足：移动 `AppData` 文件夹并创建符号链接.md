@@ -3,8 +3,7 @@
 > 通过 `robocopy` 和 `mklink` 实现无损迁移
 
 日期：2024-1-12  
-
-> [!目录] 
+> [!NOTE]
 > 1. [问题](#问题)
 > 2. [思考方案](#思考方案)
 > 3. [方法实现](#方法实现)
@@ -80,7 +79,7 @@
      ```
 
 ---
-> [!参考] 
+> 参考：
 > [如何在 Windows 10 上移动 AppData 文件夹](https://cn.windows-office.net/?p=31595)  
 > [电脑上AppData数据迁移（解决C盘空间不足的问题）](https://cloud.tencent.com/developer/article/2245362)  
 > [在Windows中创建软链接和硬链接（mklink 命令使用教程）](https://lykqq.com/tutorial/533.html)  
