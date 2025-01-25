@@ -70,18 +70,18 @@ function addIssueToContext(ctx, issueData) {
 }
 function __classPrivateFieldGet(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 }
 function __classPrivateFieldSet(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 }
 function processCreateParams(params) {
@@ -89,7 +89,7 @@ function processCreateParams(params) {
     return {};
   const { errorMap: errorMap2, invalid_type_error, required_error, description } = params;
   if (errorMap2 && (invalid_type_error || required_error)) {
-    throw new Error(`不能在自定义错误映射中使用 "invalid_type_error" 或 "required_error"`);
+    throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);
   }
   if (errorMap2)
     return { errorMap: errorMap2, description };
@@ -471,7 +471,7 @@ var init_lib = __esm({
       }
       static assert(value) {
         if (!(value instanceof ZodError)) {
-          throw new Error(`不是 ZodError: ${value}`);
+          throw new Error(`Not a ZodError: ${value}`);
         }
       }
       toString() {
@@ -720,7 +720,7 @@ var init_lib = __esm({
         return { success: true, data: result.value };
       } else {
         if (!ctx.common.issues.length) {
-          throw new Error("验证失败但未检测到问题。");
+          throw new Error("Validation failed but no issues detected.");
         }
         return {
           success: false,
@@ -767,7 +767,7 @@ var init_lib = __esm({
       _parseSync(input) {
         const result = this._parse(input);
         if (isAsync(result)) {
-          throw new Error("同步解析遇到 Promise。");
+          throw new Error("Synchronous parse encountered promise.");
         }
         return result;
       }
@@ -2419,7 +2419,7 @@ var init_lib = __esm({
           } else if (unknownKeys === "strip")
             ;
           else {
-            throw new Error(`内部 ZodObject 错误:无效的 unknownKeys 值。`);
+            throw new Error(`Internal ZodObject error: invalid unknownKeys value.`);
           }
         } else {
           const catchall = this._def.catchall;
@@ -2873,11 +2873,11 @@ var init_lib = __esm({
         for (const type of options) {
           const discriminatorValues = getDiscriminator(type.shape[discriminator]);
           if (!discriminatorValues.length) {
-            throw new Error(`带有键 \ 的区分器值 \`${discriminator}\` could not be extracted from all schema options`);
+            throw new Error(`A discriminator value for key \`${discriminator}\` could not be extracted from all schema options`);
           }
           for (const value of discriminatorValues) {
             if (optionsMap.has(value)) {
-              throw new Error(`区分属性 ${String(discriminator)} 有重复值 ${String(value)}`);
+              throw new Error(`Discriminator property ${String(discriminator)} has duplicate value ${String(value)}`);
             }
             optionsMap.set(value, type);
           }
@@ -3002,7 +3002,7 @@ var init_lib = __esm({
     };
     ZodTuple.create = (schemas, params) => {
       if (!Array.isArray(schemas)) {
-        throw new Error("必须将模式数组传递给 z.tuple([...])");
+        throw new Error("You must pass an array of schemas to z.tuple([ ... ])");
       }
       return new ZodTuple({
         items: schemas,
@@ -3581,7 +3581,7 @@ var init_lib = __esm({
               return Promise.resolve(result);
             }
             if (result instanceof Promise) {
-              throw new Error("异步细化在同步解析操作中遇到。使用 .parseAsync 替代。");
+              throw new Error("Async refinement encountered during synchronous parse operation. Use .parseAsync instead.");
             }
             return acc;
           };
@@ -3620,7 +3620,7 @@ var init_lib = __esm({
               return base;
             const result = effect.transform(base.value, checkCtx);
             if (result instanceof Promise) {
-              throw new Error(`同步解析操作中遇到异步转换。使用 .parseAsync 替代。`);
+              throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
             }
             return { status: status.value, value: result };
           } else {
@@ -4138,7 +4138,7 @@ var require_retry_operation = __commonJS({
       var currentTime = new Date().getTime();
       if (err && currentTime - this._operationStart >= this._maxRetryTime) {
         this._errors.push(err);
-        this._errors.unshift(new Error("重试操作超时"));
+        this._errors.unshift(new Error("RetryOperation timeout occurred"));
         return false;
       }
       this._errors.push(err);
@@ -4189,11 +4189,11 @@ var require_retry_operation = __commonJS({
       this._fn(this._attempts);
     };
     RetryOperation.prototype.try = function(fn) {
-      console.log("使用 RetryOperation.try() 已废弃");
+      console.log("Using RetryOperation.try() is deprecated");
       this.attempt(fn);
     };
     RetryOperation.prototype.start = function(fn) {
-      console.log("使用 RetryOperation.start() 已废弃");
+      console.log("Using RetryOperation.start() is deprecated");
       this.attempt(fn);
     };
     RetryOperation.prototype.start = RetryOperation.prototype.try;
@@ -4252,7 +4252,7 @@ var require_retry = __commonJS({
         opts[key] = options[key];
       }
       if (opts.minTimeout > opts.maxTimeout) {
-        throw new Error("minTimeout 大于 maxTimeout");
+        throw new Error("minTimeout is greater than maxTimeout");
       }
       var timeouts = [];
       for (var i3 = 0; i3 < opts.retries; i3++) {
@@ -4367,7 +4367,7 @@ var require_p_retry = __commonJS({
           resolve(await input(attemptNumber));
         } catch (error) {
           if (!(error instanceof Error)) {
-            reject(new TypeError(`抛出了非错误:"${error}"。您应该只抛出错误。`));
+            reject(new TypeError(`Non-error was thrown: "${error}". You should only throw errors.`));
             return;
           }
           if (error instanceof AbortError) {
@@ -4436,7 +4436,7 @@ function rng() {
   if (!getRandomValues) {
     getRandomValues = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
     if (!getRandomValues) {
-      throw new Error("crypto.getRandomValues() 不受支持。参见 https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
     }
   }
   return getRandomValues(rnds8);
@@ -4534,7 +4534,7 @@ function rng2() {
   if (!getRandomValues2) {
     getRandomValues2 = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
     if (!getRandomValues2) {
-      throw new Error("crypto.getRandomValues() 不受支持。参见 https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
     }
   }
   return getRandomValues2(rnds82);
@@ -4613,7 +4613,7 @@ var require_eventemitter3 = __commonJS({
     }
     function addListener(emitter, event, fn, context, once) {
       if (typeof fn !== "function") {
-        throw new TypeError("监听器必须是一个函数");
+        throw new TypeError("The listener must be a function");
       }
       var listener = new EE(fn, context || emitter, once), evt = prefix ? prefix + event : event;
       if (!emitter._events[evt])
@@ -4809,7 +4809,7 @@ var require_p_timeout = __commonJS({
     };
     var pTimeout = (promise, milliseconds, fallback) => new Promise((resolve, reject) => {
       if (typeof milliseconds !== "number" || milliseconds < 0) {
-        throw new TypeError("期望 `milliseconds` 是一个正数");
+        throw new TypeError("Expected `milliseconds` to be a positive number");
       }
       if (milliseconds === Infinity) {
         resolve(promise);
@@ -4929,10 +4929,10 @@ var require_dist = __commonJS({
         this._resolveIdle = empty;
         options = Object.assign({ carryoverConcurrencyCount: false, intervalCap: Infinity, interval: 0, concurrency: Infinity, autoStart: true, queueClass: priority_queue_1.default }, options);
         if (!(typeof options.intervalCap === "number" && options.intervalCap >= 1)) {
-          throw new TypeError(`期望 \`intervalCap\` to be a number from 1 and up, got \`${(_b = (_a5 = options.intervalCap) === null || _a5 === void 0 ? void 0 : _a5.toString()) !== null && _b !== void 0 ? _b : ""}\` (${typeof options.intervalCap})`);
+          throw new TypeError(`Expected \`intervalCap\` to be a number from 1 and up, got \`${(_b = (_a5 = options.intervalCap) === null || _a5 === void 0 ? void 0 : _a5.toString()) !== null && _b !== void 0 ? _b : ""}\` (${typeof options.intervalCap})`);
         }
         if (options.interval === void 0 || !(Number.isFinite(options.interval) && options.interval >= 0)) {
-          throw new TypeError(`期望 \`interval\` to be a finite number >= 0, got \`${(_d = (_c = options.interval) === null || _c === void 0 ? void 0 : _c.toString()) !== null && _d !== void 0 ? _d : ""}\` (${typeof options.interval})`);
+          throw new TypeError(`Expected \`interval\` to be a finite number >= 0, got \`${(_d = (_c = options.interval) === null || _c === void 0 ? void 0 : _c.toString()) !== null && _d !== void 0 ? _d : ""}\` (${typeof options.interval})`);
         }
         this._carryoverConcurrencyCount = options.carryoverConcurrencyCount;
         this._isIntervalIgnored = options.intervalCap === Infinity || options.interval === 0;
@@ -5042,7 +5042,7 @@ var require_dist = __commonJS({
       }
       set concurrency(newConcurrency) {
         if (!(typeof newConcurrency === "number" && newConcurrency >= 1)) {
-          throw new TypeError(`期望 \`concurrency\` to be a number from 1 and up, got \`${newConcurrency}\` (${typeof newConcurrency})`);
+          throw new TypeError(`Expected \`concurrency\` to be a number from 1 and up, got \`${newConcurrency}\` (${typeof newConcurrency})`);
         }
         this._concurrency = newConcurrency;
         this._processQueue();
@@ -8275,12 +8275,12 @@ Context: ${context}`);
         } else if (runId !== void 0) {
           const run_ = await this.readRun(runId);
           if (!run_.app_path) {
-            throw new Error(`运行 ${runId} 没有 app_path`);
+            throw new Error(`Run ${runId} has no app_path`);
           }
           const baseUrl = this.getHostUrl();
           return `${baseUrl}${run_.app_path}`;
         } else {
-          throw new Error("必须提供 runId 或 run");
+          throw new Error("Must provide either runId or run");
         }
       }
       async _loadChildRuns(run) {
@@ -8290,7 +8290,7 @@ Context: ${context}`);
         childRuns.sort((a3, b3) => (a3?.dotted_order ?? "").localeCompare(b3?.dotted_order ?? ""));
         for (const childRun of childRuns) {
           if (childRun.parent_run_id === null || childRun.parent_run_id === void 0) {
-            throw new Error(`子运行 ${childRun.id} 没有父运行`);
+            throw new Error(`Child run ${childRun.id} has no parent`);
           }
           if (!(childRun.parent_run_id in treemap)) {
             treemap[childRun.parent_run_id] = [];
@@ -8515,7 +8515,7 @@ Context: ${context}`);
         });
         const result = await response.json();
         if (result === null || !("share_token" in result)) {
-          throw new Error("无效的服务器响应");
+          throw new Error("Invalid response from server");
         }
         return `${this.getHostUrl()}/public/${result["share_token"]}/r`;
       }
@@ -8564,7 +8564,7 @@ Context: ${context}`);
       }
       async readDatasetSharedSchema(datasetId, datasetName) {
         if (!datasetId && !datasetName) {
-          throw new Error("必须提供 datasetId 或 datasetName");
+          throw new Error("Either datasetId or datasetName must be given");
         }
         if (!datasetId) {
           const dataset = await this.readDataset({ datasetName });
@@ -8583,7 +8583,7 @@ Context: ${context}`);
       }
       async shareDataset(datasetId, datasetName) {
         if (!datasetId && !datasetName) {
-          throw new Error("必须提供 datasetId 或 datasetName");
+          throw new Error("Either datasetId or datasetName must be given");
         }
         if (!datasetId) {
           const dataset = await this.readDataset({ datasetName });
@@ -8719,14 +8719,14 @@ Message: ${result.detail.join("\n")}`);
         let path = "/sessions";
         const params = new URLSearchParams();
         if (projectId !== void 0 && projectName !== void 0) {
-          throw new Error("必须提供 projectName 或 projectId,但不能同时提供两者");
+          throw new Error("Must provide either projectName or projectId, not both");
         } else if (projectId !== void 0) {
           assertUuid(projectId);
           path += `/${projectId}`;
         } else if (projectName !== void 0) {
           params.append("name", projectName);
         } else {
-          throw new Error("必须提供 projectName 或 projectId");
+          throw new Error("Must provide projectName or projectId");
         }
         const response = await this.caller.call(_getFetchImplementation(), `${this.apiUrl}${path}?${params}`, {
           method: "GET",
@@ -8751,14 +8751,14 @@ Message: ${result.detail.join("\n")}`);
         let path = "/sessions";
         const params = new URLSearchParams();
         if (projectId !== void 0 && projectName !== void 0) {
-          throw new Error("必须提供 projectName 或 projectId,但不能同时提供两者");
+          throw new Error("Must provide either projectName or projectId, not both");
         } else if (projectId !== void 0) {
           assertUuid(projectId);
           path += `/${projectId}`;
         } else if (projectName !== void 0) {
           params.append("name", projectName);
         } else {
-          throw new Error("必须提供 projectName 或 projectId");
+          throw new Error("Must provide projectName or projectId");
         }
         if (includeStats !== void 0) {
           params.append("include_stats", includeStats.toString());
@@ -8767,7 +8767,7 @@ Message: ${result.detail.join("\n")}`);
         let result;
         if (Array.isArray(response)) {
           if (response.length === 0) {
-            throw new Error(`项目[id=${projectId}, name=${projectName}] 未找到`);
+            throw new Error(`Project[id=${projectId}, name=${projectName}] not found`);
           }
           result = response[0];
         } else {
@@ -8785,7 +8785,7 @@ Message: ${result.detail.join("\n")}`);
       }
       async getDatasetUrl({ datasetId, datasetName }) {
         if (datasetId === void 0 && datasetName === void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide either datasetName or datasetId");
         }
         const dataset = await this.readDataset({ datasetId, datasetName });
         const tenantId = await this._getTenantId();
@@ -8800,7 +8800,7 @@ Message: ${result.detail.join("\n")}`);
           this._tenantId = projects[0].tenant_id;
           return projects[0].tenant_id;
         }
-        throw new Error("未找到可解决租户的项目。");
+        throw new Error("No projects found to resolve tenant.");
       }
       async *listProjects({ projectIds, name, nameContains, referenceDatasetId, referenceDatasetName, referenceFree, metadata } = {}) {
         const params = new URLSearchParams();
@@ -8836,9 +8836,9 @@ Message: ${result.detail.join("\n")}`);
       async deleteProject({ projectId, projectName }) {
         let projectId_;
         if (projectId === void 0 && projectName === void 0) {
-          throw new Error("必须提供 projectName 或 projectId");
+          throw new Error("Must provide projectName or projectId");
         } else if (projectId !== void 0 && projectName !== void 0) {
-          throw new Error("必须提供 projectName 或 projectId,但不能同时提供两者");
+          throw new Error("Must provide either projectName or projectId, not both");
         } else if (projectId === void 0) {
           projectId_ = (await this.readProject({ projectName })).id;
         } else {
@@ -8913,20 +8913,20 @@ Message: ${result.detail.join("\n")}`);
         let path = "/datasets";
         const params = new URLSearchParams({ limit: "1" });
         if (datasetId !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId !== void 0) {
           assertUuid(datasetId);
           path += `/${datasetId}`;
         } else if (datasetName !== void 0) {
           params.append("name", datasetName);
         } else {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide datasetName or datasetId");
         }
         const response = await this._get(path, params);
         let result;
         if (Array.isArray(response)) {
           if (response.length === 0) {
-            throw new Error(`数据集[id=${datasetId}, name=${datasetName}] 未找到`);
+            throw new Error(`Dataset[id=${datasetId}, name=${datasetName}] not found`);
           }
           result = response[0];
         } else {
@@ -8951,9 +8951,9 @@ Message: ${result.detail.join("\n")}`);
       async diffDatasetVersions({ datasetId, datasetName, fromVersion, toVersion }) {
         let datasetId_ = datasetId;
         if (datasetId_ === void 0 && datasetName === void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide either datasetName or datasetId");
         } else if (datasetId_ !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId_ === void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -8971,7 +8971,7 @@ Message: ${result.detail.join("\n")}`);
         } else if (datasetName !== void 0) {
           datasetId = (await this.readDataset({ datasetName })).id;
         } else {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide datasetName or datasetId");
         }
         const response = await this._getResponse(`${path}/${datasetId}/openai_ft`);
         const datasetText = await response.text();
@@ -9010,7 +9010,7 @@ Message: ${result.detail.join("\n")}`);
       async updateDataset(props) {
         const { datasetId, datasetName, ...update2 } = props;
         if (!datasetId && !datasetName) {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide either datasetName or datasetId");
         }
         const _datasetId = datasetId ?? (await this.readDataset({ datasetName })).id;
         assertUuid(_datasetId);
@@ -9028,7 +9028,7 @@ Message: ${result.detail.join("\n")}`);
         let path = "/datasets";
         let datasetId_ = datasetId;
         if (datasetId !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetName !== void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -9037,7 +9037,7 @@ Message: ${result.detail.join("\n")}`);
           assertUuid(datasetId_);
           path += `/${datasetId_}`;
         } else {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide datasetName or datasetId");
         }
         const response = await this.caller.call(_getFetchImplementation(), this.apiUrl + path, {
           method: "DELETE",
@@ -9051,9 +9051,9 @@ Message: ${result.detail.join("\n")}`);
       async indexDataset({ datasetId, datasetName, tag }) {
         let datasetId_ = datasetId;
         if (!datasetId_ && !datasetName) {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide either datasetName or datasetId");
         } else if (datasetId_ && datasetName) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (!datasetId_) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -9125,9 +9125,9 @@ Message: ${result.detail.join("\n")}`);
       async createExample(inputs, outputs, { datasetId, datasetName, createdAt, exampleId, metadata, split, sourceRunId }) {
         let datasetId_ = datasetId;
         if (datasetId_ === void 0 && datasetName === void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide either datasetName or datasetId");
         } else if (datasetId_ !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId_ === void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -9158,9 +9158,9 @@ Message: ${result.detail.join("\n")}`);
         const { inputs, outputs, metadata, sourceRunIds, exampleIds, datasetId, datasetName } = props;
         let datasetId_ = datasetId;
         if (datasetId_ === void 0 && datasetName === void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId");
+          throw new Error("Must provide either datasetName or datasetId");
         } else if (datasetId_ !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId_ === void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -9219,14 +9219,14 @@ Message: ${result.detail.join("\n")}`);
       async *listExamples({ datasetId, datasetName, exampleIds, asOf, splits, inlineS3Urls, metadata, limit: limit2, offset: offset5, filter: filter2, includeAttachments } = {}) {
         let datasetId_;
         if (datasetId !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId !== void 0) {
           datasetId_ = datasetId;
         } else if (datasetName !== void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
         } else {
-          throw new Error("必须提供数据集名称或数据集 ID");
+          throw new Error("Must provide a datasetName or datasetId");
         }
         const params = new URLSearchParams({ dataset: datasetId_ });
         const dataset_version = asOf ? typeof asOf === "string" ? asOf : asOf?.toISOString() : void 0;
@@ -9324,7 +9324,7 @@ Message: ${result.detail.join("\n")}`);
         if (datasetId === void 0 && datasetName === void 0) {
           throw new Error("Must provide dataset name or ID");
         } else if (datasetId !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId === void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -9345,7 +9345,7 @@ Message: ${result.detail.join("\n")}`);
         if (datasetId === void 0 && datasetName === void 0) {
           throw new Error("Must provide dataset name or ID");
         } else if (datasetId !== void 0 && datasetName !== void 0) {
-          throw new Error("必须提供 datasetName 或 datasetId,但不能同时提供两者");
+          throw new Error("Must provide either datasetName or datasetId, not both");
         } else if (datasetId === void 0) {
           const dataset = await this.readDataset({ datasetName });
           datasetId_ = dataset.id;
@@ -9381,7 +9381,7 @@ Message: ${result.detail.join("\n")}`);
         } else if (typeof run === "object" && "id" in run) {
           run_ = run;
         } else {
-          throw new Error(`无效的运行类型: ${typeof run}`);
+          throw new Error(`Invalid run type: ${typeof run}`);
         }
         if (run_.reference_example_id !== null && run_.reference_example_id !== void 0) {
           referenceExample = await this.readExample(run_.reference_example_id);
@@ -9392,10 +9392,10 @@ Message: ${result.detail.join("\n")}`);
       }
       async createFeedback(runId, key, { score, value, correction, comment, sourceInfo, feedbackSourceType = "api", sourceRunId, feedbackId, feedbackConfig, projectId, comparativeExperimentId }) {
         if (!runId && !projectId) {
-          throw new Error("必须提供 runId 或 projectId");
+          throw new Error("One of runId or projectId must be provided");
         }
         if (runId && projectId) {
-          throw new Error("只能提供 runId 或 projectId 中的一个");
+          throw new Error("Only one of runId or projectId can be provided");
         }
         const feedback_source = {
           type: feedbackSourceType ?? "api",
@@ -10177,7 +10177,7 @@ ${detail}`);
         const finalDatasetName = datasetName || ds.name;
         try {
           if (await this.hasDataset({ datasetId: finalDatasetName })) {
-            console.log(`数据集 ${finalDatasetName} 已存在于您的租户中。跳过。`);
+            console.log(`Dataset ${finalDatasetName} already exists in your tenant. Skipping.`);
             return;
           }
         } catch (_2) {
@@ -10196,7 +10196,7 @@ ${detail}`);
             datasetId: dataset.id
           });
         } catch (e3) {
-          console.error(`创建数据集 ${finalDatasetName} 时出错。你应该手动删除它。`);
+          console.error(`An error occurred while creating dataset ${finalDatasetName}. You should delete it manually.`);
           throw e3;
         }
       }
@@ -11143,7 +11143,7 @@ function applyOperation(document2, operation, validateOperation = false, mutateD
     } else if (operation.op === "test") {
       returnValue.test = _areEquals(document2, operation.value);
       if (returnValue.test === false) {
-        throw new JsonPatchError("测试操作失败` , `TEST_OPERATION_FAILED", index2, operation, document2);
+        throw new JsonPatchError("Test operation failed", "TEST_OPERATION_FAILED", index2, operation, document2);
       }
       returnValue.newDocument = document2;
       return returnValue;
@@ -11156,7 +11156,7 @@ function applyOperation(document2, operation, validateOperation = false, mutateD
       return returnValue;
     } else {
       if (validateOperation) {
-        throw new JsonPatchError("操作 'op' 属性不是 RFC-6902 中定义的操作之一` , `OPERATION_OP_INVALID", index2, operation, document2);
+        throw new JsonPatchError("Operation `op` property is not one of operations defined in RFC-6902", "OPERATION_OP_INVALID", index2, operation, document2);
       } else {
         return returnValue;
       }
@@ -11184,7 +11184,7 @@ function applyOperation(document2, operation, validateOperation = false, mutateD
         key = unescapePathComponent(key);
       }
       if (banPrototypeModifications && (key == "__proto__" || key == "prototype" && t3 > 0 && keys[t3 - 1] == "constructor")) {
-        throw new TypeError("JSON-Patch:出于安全原因,禁止修改 ' __proto__ ' 或 ' constructor/prototype ' 属性,如果这是故意的,请将 ' banPrototypeModifications ' 标志设置为 false 并将其传递给此函数。更多信息参见 fast-json-patch README");
+        throw new TypeError("JSON-Patch: modifying `__proto__` or `constructor/prototype` prop is banned for security reasons, if this was on purpose, please set `banPrototypeModifications` flag false and pass it to this function. More info in fast-json-patch README");
       }
       if (validateOperation) {
         if (existingPathFragment === void 0) {
@@ -11204,18 +11204,18 @@ function applyOperation(document2, operation, validateOperation = false, mutateD
           key = obj.length;
         } else {
           if (validateOperation && !isInteger(key)) {
-            throw new JsonPatchError("期望一个无符号十进制整数值,使新引用的值为具有零基索引的数组元素` , `OPERATION_PATH_ILLEGAL_ARRAY_INDEX", index2, operation, document2);
+            throw new JsonPatchError("Expected an unsigned base-10 integer value, making the new referenced value the array element with the zero-based index", "OPERATION_PATH_ILLEGAL_ARRAY_INDEX", index2, operation, document2);
           } else if (isInteger(key)) {
             key = ~~key;
           }
         }
         if (t3 >= len) {
           if (validateOperation && operation.op === "add" && key > obj.length) {
-            throw new JsonPatchError("指定的索引不得大于数组中的元素数量` , `OPERATION_VALUE_OUT_OF_BOUNDS", index2, operation, document2);
+            throw new JsonPatchError("The specified index MUST NOT be greater than the number of elements in the array", "OPERATION_VALUE_OUT_OF_BOUNDS", index2, operation, document2);
           }
           const returnValue = arrOps[operation.op].call(operation, obj, key, document2);
           if (returnValue.test === false) {
-            throw new JsonPatchError("测试操作失败` , `TEST_OPERATION_FAILED", index2, operation, document2);
+            throw new JsonPatchError("Test operation failed", "TEST_OPERATION_FAILED", index2, operation, document2);
           }
           return returnValue;
         }
@@ -11223,14 +11223,14 @@ function applyOperation(document2, operation, validateOperation = false, mutateD
         if (t3 >= len) {
           const returnValue = objOps[operation.op].call(operation, obj, key, document2);
           if (returnValue.test === false) {
-            throw new JsonPatchError("测试操作失败` , `TEST_OPERATION_FAILED", index2, operation, document2);
+            throw new JsonPatchError("Test operation failed", "TEST_OPERATION_FAILED", index2, operation, document2);
           }
           return returnValue;
         }
       }
       obj = obj[key];
       if (validateOperation && t3 < len && (!obj || typeof obj !== "object")) {
-        throw new JsonPatchError("无法在所需路径执行操作` , `OPERATION_PATH_UNRESOLVABLE", index2, operation, document2);
+        throw new JsonPatchError("Cannot perform operation at the desired path", "OPERATION_PATH_UNRESOLVABLE", index2, operation, document2);
       }
     }
   }
@@ -11238,7 +11238,7 @@ function applyOperation(document2, operation, validateOperation = false, mutateD
 function applyPatch(document2, patch, validateOperation, mutateDocument = true, banPrototypeModifications = true) {
   if (validateOperation) {
     if (!Array.isArray(patch)) {
-      throw new JsonPatchError("补丁序列必须是一个数组` , `SEQUENCE_NOT_AN_ARRAY");
+      throw new JsonPatchError("Patch sequence must be an array", "SEQUENCE_NOT_AN_ARRAY");
     }
   }
   if (!mutateDocument) {
@@ -11255,35 +11255,35 @@ function applyPatch(document2, patch, validateOperation, mutateDocument = true, 
 function applyReducer(document2, operation, index2) {
   const operationResult = applyOperation(document2, operation);
   if (operationResult.test === false) {
-    throw new JsonPatchError("测试操作失败` , `TEST_OPERATION_FAILED", index2, operation, document2);
+    throw new JsonPatchError("Test operation failed", "TEST_OPERATION_FAILED", index2, operation, document2);
   }
   return operationResult.newDocument;
 }
 function validator(operation, index2, document2, existingPathFragment) {
   if (typeof operation !== "object" || operation === null || Array.isArray(operation)) {
-    throw new JsonPatchError("操作不是一个对象` , `OPERATION_NOT_AN_OBJECT", index2, operation, document2);
+    throw new JsonPatchError("Operation is not an object", "OPERATION_NOT_AN_OBJECT", index2, operation, document2);
   } else if (!objOps[operation.op]) {
-    throw new JsonPatchError("操作 'op' 属性不是 RFC-6902 中定义的操作之一` , `OPERATION_OP_INVALID", index2, operation, document2);
+    throw new JsonPatchError("Operation `op` property is not one of operations defined in RFC-6902", "OPERATION_OP_INVALID", index2, operation, document2);
   } else if (typeof operation.path !== "string") {
-    throw new JsonPatchError("操作 'path' 属性不是一个字符串` , `OPERATION_PATH_INVALID", index2, operation, document2);
+    throw new JsonPatchError("Operation `path` property is not a string", "OPERATION_PATH_INVALID", index2, operation, document2);
   } else if (operation.path.indexOf("/") !== 0 && operation.path.length > 0) {
-    throw new JsonPatchError('操作 `path` 属性必须以 "/" 开头', "OPERATION_PATH_INVALID", index2, operation, document2);
+    throw new JsonPatchError('Operation `path` property must start with "/"', "OPERATION_PATH_INVALID", index2, operation, document2);
   } else if ((operation.op === "move" || operation.op === "copy") && typeof operation.from !== "string") {
-    throw new JsonPatchError("操作 'from' 属性不存在(适用于 'move' 和 'copy' 操作)` , `OPERATION_FROM_REQUIRED", index2, operation, document2);
+    throw new JsonPatchError("Operation `from` property is not present (applicable in `move` and `copy` operations)", "OPERATION_FROM_REQUIRED", index2, operation, document2);
   } else if ((operation.op === "add" || operation.op === "replace" || operation.op === "test") && operation.value === void 0) {
-    throw new JsonPatchError("操作 'value' 属性不存在(适用于 'add', 'replace' 和 'test' 操作)` , `OPERATION_VALUE_REQUIRED", index2, operation, document2);
+    throw new JsonPatchError("Operation `value` property is not present (applicable in `add`, `replace` and `test` operations)", "OPERATION_VALUE_REQUIRED", index2, operation, document2);
   } else if ((operation.op === "add" || operation.op === "replace" || operation.op === "test") && hasUndefined(operation.value)) {
-    throw new JsonPatchError("操作 'value' 属性不存在(适用于 'add', 'replace' 和 'test' 操作)` , `OPERATION_VALUE_CANNOT_CONTAIN_UNDEFINED", index2, operation, document2);
+    throw new JsonPatchError("Operation `value` property is not present (applicable in `add`, `replace` and `test` operations)", "OPERATION_VALUE_CANNOT_CONTAIN_UNDEFINED", index2, operation, document2);
   } else if (document2) {
     if (operation.op == "add") {
       var pathLen = operation.path.split("/").length;
       var existingPathLen = existingPathFragment.split("/").length;
       if (pathLen !== existingPathLen + 1 && pathLen !== existingPathLen) {
-        throw new JsonPatchError("无法在所需路径执行 'add' 操作` , `OPERATION_PATH_CANNOT_ADD", index2, operation, document2);
+        throw new JsonPatchError("Cannot perform an `add` operation at the desired path", "OPERATION_PATH_CANNOT_ADD", index2, operation, document2);
       }
     } else if (operation.op === "replace" || operation.op === "remove" || operation.op === "_get") {
       if (operation.path !== existingPathFragment) {
-        throw new JsonPatchError("无法在不存在的路径执行操作` , `OPERATION_PATH_UNRESOLVABLE", index2, operation, document2);
+        throw new JsonPatchError("Cannot perform the operation at a path that does not exist", "OPERATION_PATH_UNRESOLVABLE", index2, operation, document2);
       }
     } else if (operation.op === "move" || operation.op === "copy") {
       var existingValue = {
@@ -11293,7 +11293,7 @@ function validator(operation, index2, document2, existingPathFragment) {
       };
       var error = validate3([existingValue], document2);
       if (error && error.name === "OPERATION_PATH_UNRESOLVABLE") {
-        throw new JsonPatchError("无法从不存在的路径执行操作` , `OPERATION_FROM_UNRESOLVABLE", index2, operation, document2);
+        throw new JsonPatchError("Cannot perform the operation from a path that does not exist", "OPERATION_FROM_UNRESOLVABLE", index2, operation, document2);
       }
     }
   }
@@ -11301,7 +11301,7 @@ function validator(operation, index2, document2, existingPathFragment) {
 function validate3(sequence, document2, externalValidator) {
   try {
     if (!Array.isArray(sequence)) {
-      throw new JsonPatchError("补丁序列必须是一个数组` , `SEQUENCE_NOT_AN_ARRAY");
+      throw new JsonPatchError("Patch sequence must be an array", "SEQUENCE_NOT_AN_ARRAY");
     }
     if (document2) {
       applyPatch(_deepClone(document2), _deepClone(sequence), externalValidator || true);
@@ -11540,7 +11540,7 @@ var require_decamelize = __commonJS({
     "use strict";
     module2.exports = function(str2, sep) {
       if (typeof str2 !== "string") {
-        throw new TypeError("期望是一个字符串");
+        throw new TypeError("Expected a string");
       }
       sep = typeof sep === "undefined" ? "_" : sep;
       return str2.replace(/([a-z\d])([A-Z])/g, "$1" + sep + "$2").replace(/([A-Z]+)([A-Z][a-z\d]+)/g, "$1" + sep + "$2").toLowerCase();
@@ -11596,7 +11596,7 @@ var require_camelcase = __commonJS({
     };
     var camelCase2 = (input, options) => {
       if (!(typeof input === "string" || Array.isArray(input))) {
-        throw new TypeError("期望输入为 `string | string[]`");
+        throw new TypeError("Expected the input to be `string | string[]`");
       }
       options = {
         pascalCase: false,
@@ -12174,7 +12174,7 @@ ${error.stack}` : "");
       async handleLLMEnd(output, runId) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "llm") {
-          throw new Error("没有 LLM 运行结束。");
+          throw new Error("No LLM run to end.");
         }
         run.end_time = Date.now();
         run.outputs = output;
@@ -12189,7 +12189,7 @@ ${error.stack}` : "");
       async handleLLMError(error, runId) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "llm") {
-          throw new Error("没有 LLM 运行结束。");
+          throw new Error("No LLM run to end.");
         }
         run.end_time = Date.now();
         run.error = this.stringifyError(error);
@@ -12240,7 +12240,7 @@ ${error.stack}` : "");
       async handleChainEnd(outputs, runId, _parentRunId, _tags, kwargs) {
         const run = this.runMap.get(runId);
         if (!run) {
-          throw new Error("没有LLM链运行结束。");
+          throw new Error("No chain run to end.");
         }
         run.end_time = Date.now();
         run.outputs = _coerceToDict(outputs, "output");
@@ -12258,7 +12258,7 @@ ${error.stack}` : "");
       async handleChainError(error, runId, _parentRunId, _tags, kwargs) {
         const run = this.runMap.get(runId);
         if (!run) {
-          throw new Error("没有LLM链运行结束。");
+          throw new Error("No chain run to end.");
         }
         run.end_time = Date.now();
         run.error = this.stringifyError(error);
@@ -12313,7 +12313,7 @@ ${error.stack}` : "");
       async handleToolEnd(output, runId) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "tool") {
-          throw new Error("没有工具运行结束。");
+          throw new Error("No tool run to end");
         }
         run.end_time = Date.now();
         run.outputs = { output };
@@ -12328,7 +12328,7 @@ ${error.stack}` : "");
       async handleToolError(error, runId) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "tool") {
-          throw new Error("没有工具运行结束。");
+          throw new Error("No tool run to end");
         }
         run.end_time = Date.now();
         run.error = this.stringifyError(error);
@@ -12406,7 +12406,7 @@ ${error.stack}` : "");
       async handleRetrieverEnd(documents, runId) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "retriever") {
-          throw new Error("没有检索器运行结束。");
+          throw new Error("No retriever run to end");
         }
         run.end_time = Date.now();
         run.outputs = { documents };
@@ -12421,7 +12421,7 @@ ${error.stack}` : "");
       async handleRetrieverError(error, runId) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "retriever") {
-          throw new Error("没有检索器运行结束。");
+          throw new Error("No retriever run to end");
         }
         run.end_time = Date.now();
         run.error = this.stringifyError(error);
@@ -12448,7 +12448,7 @@ ${error.stack}` : "");
       async handleLLMNewToken(token, idx, runId, _parentRunId, _tags, fields) {
         const run = this.runMap.get(runId);
         if (!run || run?.run_type !== "llm") {
-          throw new Error(`提供的 "runId" 无效。`);
+          throw new Error(`Invalid "runId" provided to "handleLLMNewToken" callback.`);
         }
         run.events.push({
           name: "new_token",
@@ -12969,7 +12969,7 @@ function _mergeDicts(left, right) {
     } else if (value == null) {
       continue;
     } else if (typeof merged[key] !== typeof value || Array.isArray(merged[key]) !== Array.isArray(value)) {
-      throw new Error(`字段 [${key}] 在消息块中已存在,但类型不同。`);
+      throw new Error(`field[${key}] already exists in the message chunk, but with a different type.`);
     } else if (typeof merged[key] === "string") {
       if (key === "type") {
         continue;
@@ -13436,7 +13436,7 @@ var init_ai = __esm({
             try {
               parsedArgs = parsePartialJson(toolCallChunk.args || "{}");
               if (parsedArgs === null || typeof parsedArgs !== "object" || Array.isArray(parsedArgs)) {
-                throw new Error("工具调用块参数格式错误。");
+                throw new Error("Malformed tool call chunk args.");
               }
               toolCalls.push({
                 name: toolCallChunk.name ?? "",
@@ -13849,7 +13849,7 @@ function getBufferString(messages, humanPrefix = "Human", aiPrefix = "AI") {
     } else if (m3._getType() === "generic") {
       role = m3.role;
     } else {
-      throw new Error(`收到不受支持的消息类型: ${m3._getType()}`);
+      throw new Error(`Got unsupported message type: ${m3._getType()}`);
     }
     const nameStr = m3.name ? `${m3.name}, ` : "";
     const readableContent = typeof m3.content === "string" ? m3.content : JSON.stringify(m3.content, null, 2);
@@ -13884,7 +13884,7 @@ function convertToChunk(message) {
   } else if (ChatMessage.isInstance(message)) {
     return new ChatMessageChunk({ ...message });
   } else {
-    throw new Error("未知的消息类型。");
+    throw new Error("Unknown message type.");
   }
 }
 var init_utils2 = __esm({
@@ -23480,7 +23480,7 @@ var require_react_development = __commonJS({
             if (didWarnStateUpdateForUnmountedComponent[warningKey]) {
               return;
             }
-            error("无法在尚未挂载的组件上调用 %s。这是一个无操作，但可能表明您的应用程序中存在错误。请直接赋值给 `this.state` 或在 %s 组件中定义 `state = {};` 类属性以设置所需状态。", callerName, componentName);
+            error("Can't call %s on a component that is not yet mounted. This is a no-op, but it might indicate a bug in your application. Instead, assign to `this.state` directly or define a `state = {};` class property with the desired state in the %s component.", callerName, componentName);
             didWarnStateUpdateForUnmountedComponent[warningKey] = true;
           }
         }
@@ -23634,7 +23634,7 @@ var require_react_development = __commonJS({
         function checkKeyStringCoercion(value) {
           {
             if (willCoercionThrow(value)) {
-              error("提供的键是%s类型，不支持。在使用之前，必须将此值强制转换为字符串。", typeName(value));
+              error("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", typeName(value));
               return testStringCoercion(value);
             }
           }
@@ -28789,7 +28789,7 @@ var require_moment = __commonJS({
             since: "0001-01-01",
             until: Infinity,
             offset: 1,
-            name: "公元",
+            name: "Anno Domini",
             narrow: "AD",
             abbr: "AD"
           },
@@ -28797,7 +28797,7 @@ var require_moment = __commonJS({
             since: "0000-12-31",
             until: -Infinity,
             offset: 1,
-            name: "公元前",
+            name: "Before Christ",
             narrow: "BC",
             abbr: "BC"
           }
@@ -33981,18 +33981,18 @@ function __importDefault(mod) {
 }
 function __classPrivateFieldGet5(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 }
 function __classPrivateFieldSet5(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 }
 function __classPrivateFieldIn(state, receiver) {
@@ -35929,7 +35929,7 @@ var require_buffer = __commonJS({
         if (name) {
           return `${name} is outside of buffer bounds`;
         }
-        return "尝试访问缓冲区范围外的内存";
+        return "Attempt to access memory outside buffer bounds";
       },
       RangeError
     );
@@ -35943,7 +35943,7 @@ var require_buffer = __commonJS({
     E2(
       "ERR_OUT_OF_RANGE",
       function(str2, range, input) {
-        let msg = `值 '${str2}' 超出了范围。`;
+        let msg = `The value of "${str2}" is out of range.`;
         let received = input;
         if (Number.isInteger(input) && Math.abs(input) > 2 ** 32) {
           received = addNumericalSeparator(String(input));
@@ -37665,7 +37665,7 @@ var init_parseURL = __esm({
         }
       })();
       if (!whatwgURL) {
-        console.error(`无法将 ${JSON.stringify(value)} 解析为 whatwg URL。`);
+        console.error(`Unable to parse ${JSON.stringify(value)} as a whatwg URL.`);
         return null;
       }
       const urlString = whatwgURL.href;
@@ -37973,7 +37973,7 @@ var init_getEndpointUrl = __esm({
         try {
           return new URL(expression);
         } catch (error) {
-          console.error(`使用 ${expression} 构建 URL 失败`, error);
+          console.error(`Failed to construct URL with ${expression}`, error);
           throw error;
         }
       }
@@ -40152,7 +40152,7 @@ function rng3() {
   if (!getRandomValues3) {
     getRandomValues3 = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
     if (!getRandomValues3) {
-      throw new Error("crypto.getRandomValues() 不受支持。参见 https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
     }
   }
   return getRandomValues3(rnds83);
@@ -43900,9 +43900,9 @@ var require_validator = __commonJS({
             if (!validateTagName(tagName)) {
               let msg;
               if (tagName.trim().length === 0) {
-                msg = "后面的空格无效'<'.";
+                msg = "Invalid space after '<'.";
               } else {
-                msg = "标签 '" + tagName + "' is an invalid name.";
+                msg = "Tag '" + tagName + "' is an invalid name.";
               }
               return getErrorObject("InvalidTag", msg, getLineNumberForPosition(xmlData, i3));
             }
@@ -45677,7 +45677,7 @@ var init_package = __esm({
   "node_modules/@aws-sdk/client-cognito-identity/package.json"() {
     package_default = {
       name: "@aws-sdk/client-cognito-identity",
-      description: "AWS SDK for JavaScript Cognito Identity 客户端（适用于 Node.js、浏览器和 React Native）",
+      description: "AWS SDK for JavaScript Cognito Identity Client for Node.js, Browser and React Native",
       version: "3.645.0",
       scripts: {
         build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
@@ -46164,7 +46164,7 @@ var require_es5 = __commonJS({
         "use strict";
         t3.__esModule = true, t3.ENGINE_MAP = t3.OS_MAP = t3.PLATFORMS_MAP = t3.BROWSER_MAP = t3.BROWSER_ALIASES_MAP = void 0;
         t3.BROWSER_ALIASES_MAP = { "Amazon Silk": "amazon_silk", "Android Browser": "android", Bada: "bada", BlackBerry: "blackberry", Chrome: "chrome", Chromium: "chromium", Electron: "electron", Epiphany: "epiphany", Firefox: "firefox", Focus: "focus", Generic: "generic", "Google Search": "google_search", Googlebot: "googlebot", "Internet Explorer": "ie", "K-Meleon": "k_meleon", Maxthon: "maxthon", "Microsoft Edge": "edge", "MZ Browser": "mz", "NAVER Whale Browser": "naver", Opera: "opera", "Opera Coast": "opera_coast", PhantomJS: "phantomjs", Puffin: "puffin", QupZilla: "qupzilla", QQ: "qq", QQLite: "qqlite", Safari: "safari", Sailfish: "sailfish", "Samsung Internet for Android": "samsung_internet", SeaMonkey: "seamonkey", Sleipnir: "sleipnir", Swing: "swing", Tizen: "tizen", "UC Browser": "uc", Vivaldi: "vivaldi", "WebOS Browser": "webos", WeChat: "wechat", "Yandex Browser": "yandex", Roku: "roku" };
-        t3.BROWSER_MAP = { amazon_silk: "Amazon Silk", android: "Android Browser", bada: "Bada", blackberry: "BlackBerry", chrome: "Chrome", chromium: "Chromium", electron: "Electron", epiphany: "Epiphany", firefox: "Firefox", focus: "Focus", generic: "Generic", googlebot: "Googlebot", google_search: "谷歌搜索", ie: "Internet Explorer", k_meleon: "K-Meleon", maxthon: "Maxthon", edge: "Microsoft Edge", mz: "MZ Browser", naver: "NAVER Whale Browser", opera: "Opera", opera_coast: "Opera Coast", phantomjs: "PhantomJS", puffin: "Puffin", qupzilla: "QupZilla", qq: "QQ Browser", qqlite: "QQ Browser Lite", safari: "Safari", sailfish: "Sailfish", samsung_internet: "Samsung Internet for Android", seamonkey: "SeaMonkey", sleipnir: "Sleipnir", swing: "Swing", tizen: "Tizen", uc: "UC Browser", vivaldi: "Vivaldi", webos: "WebOS Browser", wechat: "WeChat", yandex: "Yandex Browser" };
+        t3.BROWSER_MAP = { amazon_silk: "Amazon Silk", android: "Android Browser", bada: "Bada", blackberry: "BlackBerry", chrome: "Chrome", chromium: "Chromium", electron: "Electron", epiphany: "Epiphany", firefox: "Firefox", focus: "Focus", generic: "Generic", googlebot: "Googlebot", google_search: "Google Search", ie: "Internet Explorer", k_meleon: "K-Meleon", maxthon: "Maxthon", edge: "Microsoft Edge", mz: "MZ Browser", naver: "NAVER Whale Browser", opera: "Opera", opera_coast: "Opera Coast", phantomjs: "PhantomJS", puffin: "Puffin", qupzilla: "QupZilla", qq: "QQ Browser", qqlite: "QQ Browser Lite", safari: "Safari", sailfish: "Sailfish", samsung_internet: "Samsung Internet for Android", seamonkey: "SeaMonkey", sleipnir: "Sleipnir", swing: "Swing", tizen: "Tizen", uc: "UC Browser", vivaldi: "Vivaldi", webos: "WebOS Browser", wechat: "WeChat", yandex: "Yandex Browser" };
         t3.PLATFORMS_MAP = { tablet: "tablet", mobile: "mobile", desktop: "desktop", tv: "tv" };
         t3.OS_MAP = { WindowsPhone: "Windows Phone", Windows: "Windows", MacOS: "macOS", iOS: "iOS", Android: "Android", WebOS: "WebOS", BlackBerry: "BlackBerry", Bada: "Bada", Tizen: "Tizen", Linux: "Linux", ChromeOS: "Chrome OS", PlayStation4: "PlayStation 4", Roku: "Roku" };
         t3.ENGINE_MAP = { EdgeHTML: "EdgeHTML", Blink: "Blink", Trident: "Trident", Presto: "Presto", Gecko: "Gecko", WebKit: "WebKit" };
@@ -46364,13 +46364,13 @@ var require_es5 = __commonJS({
           var t4 = { name: "Opera" }, r5 = i3.default.getFirstMatch(/(?:opr|opios)[\s/](\S+)/i, e4) || i3.default.getFirstMatch(s4, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/SamsungBrowser/i], describe: function(e4) {
-          var t4 = { name: "三星互联网浏览器 for Android" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:SamsungBrowser)[\s/](\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "Samsung Internet for Android" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:SamsungBrowser)[\s/](\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/Whale/i], describe: function(e4) {
-          var t4 = { name: "NAVER 鲸鱼浏览器" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:whale)[\s/](\d+(?:\.\d+)+)/i, e4);
+          var t4 = { name: "NAVER Whale Browser" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:whale)[\s/](\d+(?:\.\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/MZBrowser/i], describe: function(e4) {
-          var t4 = { name: "MZ 浏览器" }, r5 = i3.default.getFirstMatch(/(?:MZBrowser)[\s/](\d+(?:\.\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
+          var t4 = { name: "MZ Browser" }, r5 = i3.default.getFirstMatch(/(?:MZBrowser)[\s/](\d+(?:\.\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/focus/i], describe: function(e4) {
           var t4 = { name: "Focus" }, r5 = i3.default.getFirstMatch(/(?:focus)[\s/](\d+(?:\.\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
@@ -46385,10 +46385,10 @@ var require_es5 = __commonJS({
           var t4 = { name: "Opera Touch" }, r5 = i3.default.getFirstMatch(/(?:opt)[\s/](\d+(\.?_?\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/yabrowser/i], describe: function(e4) {
-          var t4 = { name: "Yandex 浏览器" }, r5 = i3.default.getFirstMatch(/(?:yabrowser)[\s/](\d+(\.?_?\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
+          var t4 = { name: "Yandex Browser" }, r5 = i3.default.getFirstMatch(/(?:yabrowser)[\s/](\d+(\.?_?\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/ucbrowser/i], describe: function(e4) {
-          var t4 = { name: "UC 浏览器" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:ucbrowser)[\s/](\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "UC Browser" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:ucbrowser)[\s/](\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/Maxthon|mxios/i], describe: function(e4) {
           var t4 = { name: "Maxthon" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:Maxthon|mxios)[\s/](\d+(\.?_?\d+)+)/i, e4);
@@ -46406,7 +46406,7 @@ var require_es5 = __commonJS({
           var t4 = { name: "K-Meleon" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/(?:k-meleon)[\s/](\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/micromessenger/i], describe: function(e4) {
-          var t4 = { name: "微信" }, r5 = i3.default.getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
+          var t4 = { name: "WeChat" }, r5 = i3.default.getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/qqbrowser/i], describe: function(e4) {
           var t4 = { name: /qqbrowserlite/i.test(e4) ? "QQ Browser Lite" : "QQ Browser" }, r5 = i3.default.getFirstMatch(/(?:qqbrowserlite|qqbrowser)[/](\d+(\.?_?\d+)+)/i, e4) || i3.default.getFirstMatch(s4, e4);
@@ -46415,10 +46415,10 @@ var require_es5 = __commonJS({
           var t4 = { name: "Internet Explorer" }, r5 = i3.default.getFirstMatch(/(?:msie |rv:)(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/\sedg\//i], describe: function(e4) {
-          var t4 = { name: "微软 Edge" }, r5 = i3.default.getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "Microsoft Edge" }, r5 = i3.default.getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/edg([ea]|ios)/i], describe: function(e4) {
-          var t4 = { name: "微软 Edge" }, r5 = i3.default.getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "Microsoft Edge" }, r5 = i3.default.getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/vivaldi/i], describe: function(e4) {
           var t4 = { name: "Vivaldi" }, r5 = i3.default.getFirstMatch(/vivaldi\/(\d+(\.?_?\d+)+)/i, e4);
@@ -46430,7 +46430,7 @@ var require_es5 = __commonJS({
           var t4 = { name: "Sailfish" }, r5 = i3.default.getFirstMatch(/sailfish\s?browser\/(\d+(\.\d+)?)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/silk/i], describe: function(e4) {
-          var t4 = { name: "亚马逊 Silk" }, r5 = i3.default.getFirstMatch(/silk\/(\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "Amazon Silk" }, r5 = i3.default.getFirstMatch(/silk\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/phantom/i], describe: function(e4) {
           var t4 = { name: "PhantomJS" }, r5 = i3.default.getFirstMatch(/phantomjs\/(\d+(\.?_?\d+)+)/i, e4);
@@ -46442,7 +46442,7 @@ var require_es5 = __commonJS({
           var t4 = { name: "BlackBerry" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/blackberry[\d]+\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/(web|hpw)[o0]s/i], describe: function(e4) {
-          var t4 = { name: "WebOS 浏览器" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/w(?:eb)?[o0]sbrowser\/(\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "WebOS Browser" }, r5 = i3.default.getFirstMatch(s4, e4) || i3.default.getFirstMatch(/w(?:eb)?[o0]sbrowser\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/bada/i], describe: function(e4) {
           var t4 = { name: "Bada" }, r5 = i3.default.getFirstMatch(/dolfin\/(\d+(\.?_?\d+)+)/i, e4);
@@ -46469,13 +46469,13 @@ var require_es5 = __commonJS({
           var t4 = { name: "Chrome" }, r5 = i3.default.getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/GSA/i], describe: function(e4) {
-          var t4 = { name: "Google 搜索" }, r5 = i3.default.getFirstMatch(/(?:GSA)\/(\d+(\.?_?\d+)+)/i, e4);
+          var t4 = { name: "Google Search" }, r5 = i3.default.getFirstMatch(/(?:GSA)\/(\d+(\.?_?\d+)+)/i, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: function(e4) {
           var t4 = !e4.test(/like android/i), r5 = e4.test(/android/i);
           return t4 && r5;
         }, describe: function(e4) {
-          var t4 = { name: "Android 浏览器" }, r5 = i3.default.getFirstMatch(s4, e4);
+          var t4 = { name: "Android Browser" }, r5 = i3.default.getFirstMatch(s4, e4);
           return r5 && (t4.version = r5), t4;
         } }, { test: [/playstation 4/i], describe: function(e4) {
           var t4 = { name: "PlayStation 4" }, r5 = i3.default.getFirstMatch(s4, e4);
@@ -49313,7 +49313,7 @@ var init_package2 = __esm({
   "node_modules/@aws-sdk/client-sts/package.json"() {
     package_default2 = {
       name: "@aws-sdk/client-sts",
-      description: "AWS SDK for JavaScript Sts 客户端（适用于 Node.js、浏览器和 React Native）",
+      description: "AWS SDK for JavaScript Sts Client for Node.js, Browser and React Native",
       version: "3.645.0",
       scripts: {
         build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
@@ -51827,18 +51827,18 @@ function __importDefault2(mod) {
 }
 function __classPrivateFieldGet6(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 }
 function __classPrivateFieldSet6(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 }
 function __classPrivateFieldIn2(state, receiver) {
@@ -53013,18 +53013,18 @@ function __importDefault3(mod) {
 }
 function __classPrivateFieldGet7(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 }
 function __classPrivateFieldSet7(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 }
 function __classPrivateFieldIn3(state, receiver) {
@@ -56253,7 +56253,7 @@ var require_errors3 = __commonJS({
             }
             break;
         }
-        return `${msg} 必须指定`;
+        return `${msg} must be specified`;
       },
       TypeError
     );
@@ -56273,7 +56273,7 @@ var require_errors3 = __commonJS({
         } else {
           received = inspect(input);
         }
-        return `值 '${str2}' 超出了范围。它必须是 ${range}。接收到的是 ${received}`;
+        return `The value of "${str2}" is out of range. It must be ${range}. Received ${received}`;
       },
       RangeError
     );
@@ -65728,7 +65728,7 @@ var require_BasicAuth = __commonJS({
           return void 0;
         }
         const token = js_base64_1.Base64.encode(`${basicAuth.username}:${basicAuth.password}`);
-        return `基本 ${token}`;
+        return `Basic ${token}`;
       },
       fromAuthorizationHeader: (header) => {
         const credentials = header.replace(BASIC_AUTH_HEADER_PREFIX, "");
@@ -65758,7 +65758,7 @@ var require_BearerToken = __commonJS({
         if (token == null) {
           return void 0;
         }
-        return `认证 ${token}`;
+        return `Bearer ${token}`;
       },
       fromAuthorizationHeader: (header) => {
         return header.replace(BEARER_AUTH_HEADER_PREFIX, "").trim();
@@ -66689,7 +66689,7 @@ var require_getErrorMessageForIncorrectType = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getErrorMessageForIncorrectType = void 0;
     function getErrorMessageForIncorrectType(value, expectedType) {
-      return `期望 ${expectedType}。接收到的是 ${getTypeAsString(value)}。`;
+      return `Expected ${expectedType}. Received ${getTypeAsString(value)}.`;
     }
     exports.getErrorMessageForIncorrectType = getErrorMessageForIncorrectType;
     function getTypeAsString(value) {
@@ -68530,8 +68530,8 @@ var require_streaming_utils = __commonJS({
                     try {
                       data = JSON.parse(sse.data);
                     } catch (e3) {
-                      console.error(`无法将消息解析为 JSON:`, sse.data);
-                      console.error(`来自块:`, sse.raw);
+                      console.error(`Could not parse message into JSON:`, sse.data);
+                      console.error(`From chunk:`, sse.raw);
                       throw e3;
                     }
                     if (data && data.error) {
@@ -68543,8 +68543,8 @@ var require_streaming_utils = __commonJS({
                     try {
                       data = JSON.parse(sse.data);
                     } catch (e3) {
-                      console.error(`无法将消息解析为 JSON:`, sse.data);
-                      console.error(`来自块:`, sse.raw);
+                      console.error(`Could not parse message into JSON:`, sse.data);
+                      console.error(`From chunk:`, sse.raw);
                       throw e3;
                     }
                     if (sse.event == "error") {
@@ -81372,7 +81372,7 @@ var require_Client = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -81981,7 +81981,7 @@ var require_Client2 = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -82768,7 +82768,7 @@ var require_Client3 = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -83661,7 +83661,7 @@ var require_Client4 = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -84027,7 +84027,7 @@ var require_Client5 = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -84751,7 +84751,7 @@ var require_Client6 = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -86361,7 +86361,7 @@ var require_Client7 = __commonJS({
               message: "Please specify CO_API_KEY when instantiating the client."
             });
           }
-          return `认证 ${bearer}`;
+          return `Bearer ${bearer}`;
         });
       }
     };
@@ -94109,7 +94109,7 @@ var require_react_dom_development = __commonJS({
         function checkKeyStringCoercion(value) {
           {
             if (willCoercionThrow(value)) {
-              error("提供的键是%s类型，不支持。在使用之前，必须将此值强制转换为字符串。", typeName(value));
+              error("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", typeName(value));
               return testStringCoercion(value);
             }
           }
@@ -98104,7 +98104,7 @@ var require_react_dom_development = __commonJS({
               return "DefaultHydration";
             }
             if (lane & DefaultLane) {
-              return "默认";
+              return "Default";
             }
             if (lane & TransitionHydrationLane) {
               return "TransitionHydration";
@@ -99366,7 +99366,7 @@ var require_react_dom_development = __commonJS({
         var SyntheticAnimationEvent = createSyntheticEvent(AnimationEventInterface);
         var ClipboardEventInterface = assign({}, EventInterface, {
           clipboardData: function(event) {
-            return "剪贴板数据" in event ? event.clipboardData : window.clipboardData;
+            return "clipboardData" in event ? event.clipboardData : window.clipboardData;
           }
         });
         var SyntheticClipboardEvent = createSyntheticEvent(ClipboardEventInterface);
@@ -115573,7 +115573,7 @@ var require_react_jsx_runtime_development = __commonJS({
         function checkKeyStringCoercion(value) {
           {
             if (willCoercionThrow(value)) {
-              error("提供的键是%s类型，不支持。在使用之前，必须将此值强制转换为字符串。", typeName(value));
+              error("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", typeName(value));
               return testStringCoercion(value);
             }
           }
@@ -116831,7 +116831,7 @@ var _ChainFactory = class {
       model
     ]);
     _ChainFactory.instances.set("llm_chain" /* LLM_CHAIN */, instance);
-    console.log("创建了新的LLM链。");
+    console.log("New LLM chain created.");
     return instance;
   }
   /**
@@ -117196,9 +117196,9 @@ var ProviderSettingsKeyMap = {
   cohereai: "cohereApiKey"
 };
 var VAULT_VECTOR_STORE_STRATEGIES = [
-  "NEVER(从不)" /* NEVER */,
-  "ON STARTUP(在启动时)" /* ON_STARTUP */,
-  "ON MODE SWITCH(在模式切换时)" /* ON_MODE_SWITCH */
+  "NEVER" /* NEVER */,
+  "ON STARTUP" /* ON_STARTUP */,
+  "ON MODE SWITCH" /* ON_MODE_SWITCH */
 ];
 var COMMAND_IDS = {
   ADD_CUSTOM_PROMPT: "add-custom-prompt",
@@ -117237,40 +117237,40 @@ var COMMAND_IDS = {
   TRANSLATE: "translate-selection-prompt"
 };
 var COMMAND_NAMES = {
-  [COMMAND_IDS.ADD_CUSTOM_PROMPT]: "添加自定义提示",
-  [COMMAND_IDS.APPLY_ADHOC_PROMPT]: "应用临时自定义提示",
-  [COMMAND_IDS.APPLY_CUSTOM_PROMPT]: "应用自定义提示",
-  [COMMAND_IDS.CHANGE_TONE]: "更改选择的语气",
-  [COMMAND_IDS.CLEAR_LOCAL_COPILOT_INDEX]: "清除本地Copilot索引",
-  [COMMAND_IDS.COUNT_TOTAL_VAULT_TOKENS]: "计算保管库中的总令牌数",
-  [COMMAND_IDS.COUNT_WORD_AND_TOKENS_SELECTION]: "计算选择中的单词和令牌数",
-  [COMMAND_IDS.DELETE_CUSTOM_PROMPT]: "删除自定义提示",
-  [COMMAND_IDS.EDIT_CUSTOM_PROMPT]: "编辑自定义提示",
+  [COMMAND_IDS.ADD_CUSTOM_PROMPT]: "Add custom prompt",
+  [COMMAND_IDS.APPLY_ADHOC_PROMPT]: "Apply ad-hoc custom prompt",
+  [COMMAND_IDS.APPLY_CUSTOM_PROMPT]: "Apply custom prompt",
+  [COMMAND_IDS.CHANGE_TONE]: "Change tone of selection",
+  [COMMAND_IDS.CLEAR_LOCAL_COPILOT_INDEX]: "Clear local Copilot index",
+  [COMMAND_IDS.COUNT_TOTAL_VAULT_TOKENS]: "Count total tokens in your vault",
+  [COMMAND_IDS.COUNT_WORD_AND_TOKENS_SELECTION]: "Count words and tokens in selection",
+  [COMMAND_IDS.DELETE_CUSTOM_PROMPT]: "Delete custom prompt",
+  [COMMAND_IDS.EDIT_CUSTOM_PROMPT]: "Edit custom prompt",
   [COMMAND_IDS.ELI5]: "Explain selection like I'm 5",
-  [COMMAND_IDS.EMOJIFY]: "为选择添加表情",
-  [COMMAND_IDS.FIND_RELEVANT_NOTES]: "查找相关笔记",
-  [COMMAND_IDS.FIX_GRAMMAR]: "修正选择的语法和拼写",
-  [COMMAND_IDS.FORCE_REINDEX_VAULT_TO_COPILOT_INDEX]: "强制重新索引保管库",
-  [COMMAND_IDS.GARBAGE_COLLECT_COPILOT_INDEX]: "垃圾回收Copilot索引（移除保管库中已不存在的文件）",
-  [COMMAND_IDS.GENERATE_GLOSSARY]: "为选择生成词汇表",
-  [COMMAND_IDS.GENERATE_TOC]: "为选择生成目录",
-  [COMMAND_IDS.INDEX_VAULT_TO_COPILOT_INDEX]: "索引（刷新）保管库",
-  [COMMAND_IDS.INSPECT_COPILOT_INDEX_BY_NOTE_PATHS]: "按笔记路径检查Copilot索引（调试）",
-  [COMMAND_IDS.LIST_INDEXED_FILES]: "列出所有已索引的文件（调试）",
-  [COMMAND_IDS.LOAD_COPILOT_CHAT_CONVERSATION]: "加载Copilot聊天对话",
-  [COMMAND_IDS.MAKE_LONGER]: "使选择变长",
-  [COMMAND_IDS.MAKE_SHORTER]: "使选择变短",
-  [COMMAND_IDS.OPEN_COPILOT_CHAT_WINDOW]: "打开Copilot聊天窗口",
-  [COMMAND_IDS.PRESS_RELEASE]: "将选择改写为新闻稿",
-  [COMMAND_IDS.REMOVE_FILES_FROM_COPILOT_INDEX]: "从Copilot索引中移除文件（调试）",
-  [COMMAND_IDS.REMOVE_URLS]: "从选择中移除URL",
-  [COMMAND_IDS.REWRITE_TWEET]: "将选择改写为推文",
-  [COMMAND_IDS.REWRITE_TWEET_THREAD]: "将选择改写为推文线程",
-  [COMMAND_IDS.SEARCH_ORAMA_DB]: "搜索OramaDB（调试）",
-  [COMMAND_IDS.SIMPLIFY]: "简化选择",
-  [COMMAND_IDS.SUMMARIZE]: "总结选择",
-  [COMMAND_IDS.TOGGLE_COPILOT_CHAT_WINDOW]: "切换Copilot聊天窗口",
-  [COMMAND_IDS.TRANSLATE]: "翻译选择"
+  [COMMAND_IDS.EMOJIFY]: "Emojify selection",
+  [COMMAND_IDS.FIND_RELEVANT_NOTES]: "Find relevant notes",
+  [COMMAND_IDS.FIX_GRAMMAR]: "Fix grammar and spelling of selection",
+  [COMMAND_IDS.FORCE_REINDEX_VAULT_TO_COPILOT_INDEX]: "Force reindex vault",
+  [COMMAND_IDS.GARBAGE_COLLECT_COPILOT_INDEX]: "Garbage collect Copilot index (remove files that no longer exist in vault)",
+  [COMMAND_IDS.GENERATE_GLOSSARY]: "Generate glossary for selection",
+  [COMMAND_IDS.GENERATE_TOC]: "Generate table of contents for selection",
+  [COMMAND_IDS.INDEX_VAULT_TO_COPILOT_INDEX]: "Index (refresh) vault",
+  [COMMAND_IDS.INSPECT_COPILOT_INDEX_BY_NOTE_PATHS]: "Inspect Copilot index by note paths (debug)",
+  [COMMAND_IDS.LIST_INDEXED_FILES]: "List all indexed files (debug)",
+  [COMMAND_IDS.LOAD_COPILOT_CHAT_CONVERSATION]: "Load Copilot chat conversation",
+  [COMMAND_IDS.MAKE_LONGER]: "Make selection longer",
+  [COMMAND_IDS.MAKE_SHORTER]: "Make selection shorter",
+  [COMMAND_IDS.OPEN_COPILOT_CHAT_WINDOW]: "Open Copilot Chat Window",
+  [COMMAND_IDS.PRESS_RELEASE]: "Rewrite selection to a press release",
+  [COMMAND_IDS.REMOVE_FILES_FROM_COPILOT_INDEX]: "Remove files from Copilot index (debug)",
+  [COMMAND_IDS.REMOVE_URLS]: "Remove URLs from selection",
+  [COMMAND_IDS.REWRITE_TWEET]: "Rewrite selection to a tweet",
+  [COMMAND_IDS.REWRITE_TWEET_THREAD]: "Rewrite selection to a tweet thread",
+  [COMMAND_IDS.SEARCH_ORAMA_DB]: "Search OramaDB (debug)",
+  [COMMAND_IDS.SIMPLIFY]: "Simplify selection",
+  [COMMAND_IDS.SUMMARIZE]: "Summarize selection",
+  [COMMAND_IDS.TOGGLE_COPILOT_CHAT_WINDOW]: "Toggle Copilot Chat Window",
+  [COMMAND_IDS.TRANSLATE]: "Translate selection"
 };
 var DISABLEABLE_COMMANDS = [
   COMMAND_IDS.FIX_GRAMMAR,
@@ -117344,7 +117344,7 @@ var DEFAULT_SETTINGS = {
   autosaveChat: false,
   defaultOpenArea: "view" /* VIEW */,
   customPromptsFolder: "copilot-custom-prompts",
-  indexVaultToVectorStore: "ON MODE SWITCH(在模式切换时)" /* ON_MODE_SWITCH */,
+  indexVaultToVectorStore: "ON MODE SWITCH" /* ON_MODE_SWITCH */,
   qaExclusions: "",
   qaInclusions: "",
   chatNoteContextPath: "",
@@ -117469,7 +117469,7 @@ async function getDecryptedKey(apiKey) {
     return new TextDecoder().decode(decryptedData);
   } catch (err) {
     console.error("Decryption failed:", err);
-    return "Copilot 解密 API 密钥失败！";
+    return "Copilot failed to decrypt API keys!";
   }
 }
 function isPlainText(key) {
@@ -118330,7 +118330,7 @@ async function getTagsFromNote(file, vault) {
         const normalizedTags = Array.isArray(tags) ? tags : [tags];
         return normalizedTags.map((tag) => tag.toString().replace(/^#/, "")).map((tag) => tag.toLowerCase());
       } catch (error) {
-        console.error("解析 YAML 前置事项时出错:", error);
+        console.error("Error parsing YAML frontmatter:", error);
         return [];
       }
     }
@@ -118565,7 +118565,7 @@ function getProviderLabel(provider) {
 async function insertIntoEditor(message, replace = false) {
   let leaf = app.workspace.getMostRecentLeaf();
   if (!leaf) {
-    new import_obsidian2.Notice("未找到激活的子项");
+    new import_obsidian2.Notice("No active leaf found.");
     return;
   }
   if (!(leaf.view instanceof import_obsidian2.MarkdownView)) {
@@ -118573,7 +118573,7 @@ async function insertIntoEditor(message, replace = false) {
     await leaf.setViewState({ type: "markdown", state: leaf.view.getState() });
   }
   if (!(leaf.view instanceof import_obsidian2.MarkdownView)) {
-    new import_obsidian2.Notice("无法打开Markdown视图");
+    new import_obsidian2.Notice("Failed to open a markdown view.");
     return;
   }
   const editor = leaf.view.editor;
@@ -118584,7 +118584,7 @@ async function insertIntoEditor(message, replace = false) {
   } else {
     editor.replaceRange(message, cursorTo);
   }
-  new import_obsidian2.Notice("消息已插入到激活的文档中。");
+  new import_obsidian2.Notice("Message inserted into the active note.");
 }
 
 // src/LLMProviders/brevilabsClient.ts
@@ -118599,7 +118599,7 @@ var BrevilabsClient = class {
   checkLicenseKey() {
     if (!getSettings().plusLicenseKey) {
       new import_obsidian3.Notice(
-        "未找到 Copilot Plus 许可证密钥。请在设置中输入您的许可证密钥。"
+        "Copilot Plus license key not found. Please enter your license key in the settings."
       );
       throw new Error("License key not initialized");
     }
@@ -118745,7 +118745,7 @@ var ToolManager = class {
       if (error instanceof Error) {
         new import_obsidian4.Notice(error.message);
       } else {
-        new import_obsidian4.Notice("执行工具时发生错误。请检查控制台以获取详细信息。");
+        new import_obsidian4.Notice("An error occurred while executing the tool. Check console for details.");
       }
       return null;
     }
@@ -119683,8 +119683,8 @@ var Stream = class {
             try {
               yield JSON.parse(sse.data);
             } catch (e3) {
-              console.error(`无法将消息解析为 JSON:`, sse.data);
-              console.error(`来自块:`, sse.raw);
+              console.error(`Could not parse message into JSON:`, sse.data);
+              console.error(`From chunk:`, sse.raw);
               throw e3;
             }
           }
@@ -119692,8 +119692,8 @@ var Stream = class {
             try {
               yield JSON.parse(sse.data);
             } catch (e3) {
-              console.error(`无法将消息解析为 JSON:`, sse.data);
-              console.error(`来自块:`, sse.raw);
+              console.error(`Could not parse message into JSON:`, sse.data);
+              console.error(`From chunk:`, sse.raw);
               throw e3;
             }
           }
@@ -120082,18 +120082,18 @@ var isMultipartBody = (body) => body && typeof body === "object" && body.body &&
 // node_modules/@anthropic-ai/sdk/core.mjs
 var __classPrivateFieldSet2 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet2 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _AbstractPage_client;
@@ -120626,7 +120626,7 @@ var normalizeArch = (arch) => {
   if (arch === "aarch64" || arch === "arm64")
     return "arm64";
   if (arch)
-    return `其他:${arch}`;
+    return `other:${arch}`;
   return "unknown";
 };
 var normalizePlatform = (platform2) => {
@@ -120751,12 +120751,12 @@ var APIError = class extends AnthropicError {
       return `${status} ${msg}`;
     }
     if (status) {
-      return `${status} 状态码(无正文)`;
+      return `${status} status code (no body)`;
     }
     if (msg) {
       return msg;
     }
-    return "(无状态码或正文)";
+    return "(no status code or body)";
   }
   static generate(status, errorResponse, message, headers) {
     if (!status) {
@@ -121084,18 +121084,18 @@ var partialParse = (input) => JSON.parse(generate(unstrip(strip(tokenize(input))
 // node_modules/@anthropic-ai/sdk/lib/PromptCachingBetaMessageStream.mjs
 var __classPrivateFieldSet3 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet3 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _PromptCachingBetaMessageStream_instances;
@@ -121602,18 +121602,18 @@ var Completions = class extends APIResource {
 // node_modules/@anthropic-ai/sdk/lib/MessageStream.mjs
 var __classPrivateFieldSet4 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet4 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _MessageStream_instances;
@@ -123698,7 +123698,7 @@ function rng4() {
   if (!getRandomValues4) {
     getRandomValues4 = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
     if (!getRandomValues4) {
-      throw new Error("crypto.getRandomValues() 不受支持。参见 https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
     }
   }
   return getRandomValues4(rnds84);
@@ -125451,12 +125451,12 @@ var APIError3 = class extends GroqError {
       return `${status} ${msg}`;
     }
     if (status) {
-      return `${status} 状态码(无正文)`;
+      return `${status} status code (no body)`;
     }
     if (msg) {
       return msg;
     }
-    return "(无状态码或正文)";
+    return "(no status code or body)";
   }
   static generate(status, errorResponse, message, headers) {
     if (!status) {
@@ -125602,8 +125602,8 @@ var Stream2 = class {
             try {
               data = JSON.parse(sse.data);
             } catch (e3) {
-              console.error(`无法将消息解析为 JSON:`, sse.data);
-              console.error(`来自块:`, sse.raw);
+              console.error(`Could not parse message into JSON:`, sse.data);
+              console.error(`From chunk:`, sse.raw);
               throw e3;
             }
             if (data && data.error) {
@@ -125957,18 +125957,18 @@ var addFormValue = async (form, key, value) => {
 // node_modules/groq-sdk/core.mjs
 var __classPrivateFieldSet9 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet9 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _AbstractPage_client2;
@@ -126501,7 +126501,7 @@ var normalizeArch2 = (arch) => {
   if (arch === "aarch64" || arch === "arm64")
     return "arm64";
   if (arch)
-    return `其他:${arch}`;
+    return `other:${arch}`;
   return "unknown";
 };
 var normalizePlatform2 = (platform2) => {
@@ -128134,15 +128134,15 @@ var checkOk = async (response) => {
       errorData = await response.json();
       message = errorData.error || message;
     } catch (error) {
-      console.log("未能将错误响应解析为JSON");
+      console.log("Failed to parse error response as JSON");
     }
   } else {
     try {
-      console.log("从响应中获取文本");
+      console.log("Getting text from response");
       const textResponse = await response.text();
       message = textResponse || message;
     } catch (error) {
-      console.log("无法从错误响应中获取文本");
+      console.log("Failed to get text from error response");
     }
   }
   throw new ResponseError(message, response.status);
@@ -128512,7 +128512,7 @@ function rng5() {
   if (!getRandomValues5) {
     getRandomValues5 = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
     if (!getRandomValues5) {
-      throw new Error("crypto.getRandomValues() 不受支持。参见 https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+      throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
     }
   }
   return getRandomValues5(rnds85);
@@ -129773,12 +129773,12 @@ var APIError5 = class extends OpenAIError {
       return `${status} ${msg}`;
     }
     if (status) {
-      return `${status} 状态码(无正文)`;
+      return `${status} status code (no body)`;
     }
     if (msg) {
       return msg;
     }
-    return "(无状态码或正文)";
+    return "(no status code or body)";
   }
   static generate(status, errorResponse, message, headers) {
     if (!status) {
@@ -129986,8 +129986,8 @@ var Stream3 = class {
             try {
               data = JSON.parse(sse.data);
             } catch (e3) {
-              console.error(`无法将消息解析为 JSON:`, sse.data);
-              console.error(`来自块:`, sse.raw);
+              console.error(`Could not parse message into JSON:`, sse.data);
+              console.error(`From chunk:`, sse.raw);
               throw e3;
             }
             if (data && data.error) {
@@ -129999,8 +129999,8 @@ var Stream3 = class {
             try {
               data = JSON.parse(sse.data);
             } catch (e3) {
-              console.error(`无法将消息解析为 JSON:`, sse.data);
-              console.error(`来自块:`, sse.raw);
+              console.error(`Could not parse message into JSON:`, sse.data);
+              console.error(`From chunk:`, sse.raw);
               throw e3;
             }
             if (sse.event == "error") {
@@ -130347,18 +130347,18 @@ var addFormValue2 = async (form, key, value) => {
 // node_modules/openai/core.mjs
 var __classPrivateFieldSet10 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet10 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _AbstractPage_client3;
@@ -130925,7 +130925,7 @@ var normalizeArch3 = (arch) => {
   if (arch === "aarch64" || arch === "arm64")
     return "arm64";
   if (arch)
-    return `其他:${arch}`;
+    return `other:${arch}`;
   return "unknown";
 };
 var normalizePlatform3 = (platform2) => {
@@ -131291,18 +131291,18 @@ var isToolMessage3 = (message) => {
 // node_modules/openai/lib/EventStream.mjs
 var __classPrivateFieldSet11 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet11 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _EventStream_instances;
@@ -131613,9 +131613,9 @@ function validateInputTools(tools) {
 // node_modules/openai/lib/AbstractChatCompletionRunner.mjs
 var __classPrivateFieldGet12 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _AbstractChatCompletionRunner_instances;
@@ -132202,18 +132202,18 @@ var partialParse2 = (input) => parseJSON2(input, Allow.ALL ^ Allow.NUM);
 // node_modules/openai/lib/ChatCompletionStream.mjs
 var __classPrivateFieldSet12 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var __classPrivateFieldGet13 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var _ChatCompletionStream_instances;
@@ -132772,18 +132772,18 @@ var Chat3 = class extends APIResource3 {
 // node_modules/openai/lib/AssistantStream.mjs
 var __classPrivateFieldGet14 = function(receiver, state, kind4, f3) {
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 getter");
+    throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法从其类未声明的对象读取私有成员");
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind4 === "m" ? f3 : kind4 === "a" ? f3.call(receiver) : f3 ? f3.value : state.get(receiver);
 };
 var __classPrivateFieldSet13 = function(receiver, state, value, kind4, f3) {
   if (kind4 === "m")
-    throw new TypeError("私有方法不可写");
+    throw new TypeError("Private method is not writable");
   if (kind4 === "a" && !f3)
-    throw new TypeError("私有访问器定义时没有提供 setter");
+    throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f3 : !state.has(receiver))
-    throw new TypeError("无法向其类未声明的对象写入私有成员");
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind4 === "a" ? f3.call(receiver, value) : f3 ? f3.value = value : state.set(receiver, value), value;
 };
 var _AssistantStream_instances;
@@ -136441,7 +136441,7 @@ var ChatOpenAI = class extends BaseChatModel {
         completion: choice.index ?? 0
       };
       if (typeof chunk.content !== "string") {
-        console.log("[警告]: 收到来自 OpenAI 的非字符串内容。目前不支持。");
+        console.log("[WARNING]: Received non-string content from OpenAI. This is currently not supported.");
         continue;
       }
       const generationInfo = { ...newTokenIndices };
@@ -136696,7 +136696,7 @@ var ChatOpenAI = class extends BaseChatModel {
             JSON.stringify(JSON.parse(openAIMessage.additional_kwargs.function_call?.arguments))
           );
         } catch (error) {
-          console.error("解析函数参数时出错", error, JSON.stringify(openAIMessage.additional_kwargs.function_call));
+          console.error("Error parsing function arguments", error, JSON.stringify(openAIMessage.additional_kwargs.function_call));
           count5 += await this.getNumTokens(openAIMessage.additional_kwargs.function_call?.arguments);
         }
       }
@@ -137871,7 +137871,7 @@ var ChatModelManager = class {
       ChatModelManager.chatModel = newModelInstance;
     } catch (error) {
       console.error(error);
-      new import_obsidian5.Notice(`创建模型时出错:${modelKey}`);
+      new import_obsidian5.Notice(`Error creating model: ${modelKey}`);
     }
   }
   validateChatModel(chatModel) {
@@ -137892,7 +137892,7 @@ var ChatModelManager = class {
     const selectedModel = ChatModelManager.modelMap[currentModelKey];
     if (!selectedModel?.hasApiKey) {
       ChatModelManager.chatModel = null;
-      console.log("由于缺少API密钥，无法重新初始化模型");
+      console.log("Failed to reinitialize model due to missing API key");
     }
   }
   async ping(model) {
@@ -137910,11 +137910,11 @@ var ChatModelManager = class {
       await tryPing(false);
       return true;
     } catch (firstError) {
-      console.log("首次 ping 尝试失败，正在尝试使用 CORS...");
+      console.log("First ping attempt failed, trying with CORS...");
       try {
         await tryPing(true);
         new import_obsidian5.Notice(
-          "连接成功，但需要启用CORS。请在添加此模型后启用CORS。"
+          "Connection successful, but requires CORS to be enabled. Please enable CORS for this model once you add it above."
         );
         return true;
       } catch (error) {
@@ -138260,11 +138260,11 @@ var EmbeddingManager = class {
       await tryPing(false);
       return true;
     } catch (firstError) {
-      console.log("首次 ping 尝试失败，正在尝试使用 CORS...");
+      console.log("First ping attempt failed, trying with CORS...");
       try {
         await tryPing(true);
         new import_obsidian6.Notice(
-          "连接成功，但需要启用CORS。请在添加此模型后启用CORS。"
+          "Connection successful, but requires CORS to be enabled. Please enable CORS for this model once you add it above."
         );
         return true;
       } catch (error) {
@@ -142356,7 +142356,7 @@ var ChunkedStorage = class {
       partitions.set(i3, []);
     }
     if (getSettings().debug) {
-      console.log(`待分发的文档总数：${documents.length}`);
+      console.log(`Total documents to distribute: ${documents.length}`);
     }
     for (const doc of documents) {
       const partitionIndex = this.assignDocumentToPartition(doc.id, numPartitions);
@@ -142375,7 +142375,7 @@ var ChunkedStorage = class {
       }
     });
     if (getSettings().debug) {
-      console.log(`已分发的文档总数：${totalDistributed}`);
+      console.log(`Total documents distributed: ${totalDistributed}`);
       if (totalDistributed !== documents.length) {
         console.error(
           `Document count mismatch! Original: ${documents.length}, Distributed: ${totalDistributed}`
@@ -142409,7 +142409,7 @@ var ChunkedStorage = class {
       const docsData = rawData.docs?.docs;
       const rawDocs = Array.isArray(docsData) ? docsData : Object.values(docsData || {});
       if (getSettings().debug) {
-        console.log(`开始保存，共 ${rawDocs.length ?? 0} 个文档`);
+        console.log(`Starting save with ${rawDocs.length ?? 0} total documents`);
       }
       if (!rawDocs || rawDocs.length === 0) {
         const metadata2 = {
@@ -142423,7 +142423,7 @@ var ChunkedStorage = class {
         await this.ensureDirectoryExists(metadataPath);
         await this.app.vault.adapter.write(metadataPath, JSON.stringify(metadata2));
         if (getSettings().debug) {
-          console.log("已保存空数据库状态");
+          console.log("Saved empty database state");
         }
         return;
       }
@@ -142477,11 +142477,11 @@ var ChunkedStorage = class {
         await this.ensureDirectoryExists(chunkPath);
         await this.app.vault.adapter.write(chunkPath, JSON.stringify(finalPartitionData));
         if (getSettings().debug) {
-          console.log(`已保存分区 ${partitionIndex + 1}/${numPartitions}`);
+          console.log(`Saved partition ${partitionIndex + 1}/${numPartitions}`);
         }
       }
       if (getSettings().debug) {
-        console.log("已保存所有分区");
+        console.log("Saved all partitions");
       }
     } catch (error) {
       console.error(`Error saving database:`, error);
@@ -142614,7 +142614,7 @@ async function getVectorLength(embeddingInstance) {
       throw new CustomError("Failed to get valid embedding vector length");
     }
     console.log(
-      `检测到的向量长度：${sampleEmbedding.length}，模型：${EmbeddingManager.getModelName(embeddingInstance)}`
+      `Detected vector length: ${sampleEmbedding.length} for model: ${EmbeddingManager.getModelName(embeddingInstance)}`
     );
     return sampleEmbedding.length;
   } catch (error) {
@@ -142692,11 +142692,11 @@ var DBOperations = class {
       }
       const newPath = await this.getDbPath();
       if (this.dbPath && newPath !== this.dbPath) {
-        console.log("检测到路径更改，正在重新初始化数据库...");
+        console.log("Path change detected, reinitializing database...");
         this.dbPath = newPath;
         await this.initializeChunkedStorage();
         await this.initializeDB(await EmbeddingManager.getInstance().getEmbeddingsAPI());
-        console.log("数据库已使用新路径重新初始化：", newPath);
+        console.log("Database reinitialized with new path:", newPath);
       }
     });
   }
@@ -142725,18 +142725,18 @@ var DBOperations = class {
       try {
         if (await this.chunkedStorage.exists()) {
           this.oramaDb = await this.chunkedStorage.loadDatabase();
-          console.log("已从磁盘加载现有的分块 Orama 数据库。");
+          console.log("Loaded existing chunked Orama database from disk.");
           return this.oramaDb;
         }
       } catch (error) {
-        console.log("无法加载现有数据库，正在创建新数据库：", error);
+        console.log("Failed to load existing database, creating new one:", error);
       }
       const newDb = await this.createNewDb(embeddingInstance);
       this.oramaDb = newDb;
       return newDb;
     } catch (error) {
       console.error(`Error initializing Orama database:`, error);
-      new import_obsidian7.Notice("无法初始化 Copilot 数据库。部分功能可能受限。");
+      new import_obsidian7.Notice("Failed to initialize Copilot database. Some features may be limited.");
       return void 0;
     }
   }
@@ -142759,7 +142759,7 @@ var DBOperations = class {
       await this.chunkedStorage.saveDatabase(this.oramaDb);
       this.hasUnsavedChanges = false;
       if (getSettings().debug) {
-        console.log("Orama 数据库已成功保存至：", this.dbPath);
+        console.log("Orama database saved successfully at:", this.dbPath);
       }
     } catch (error) {
       console.error(`Error saving Orama database:`, error);
@@ -142775,11 +142775,11 @@ var DBOperations = class {
       await new Promise((resolve) => setTimeout(resolve, 100));
       this.oramaDb = await this.createNewDb(embeddingInstance);
       await this.saveDB();
-      new import_obsidian7.Notice("本地 Copilot 索引已成功清除。");
-      console.log("本地 Copilot 索引已成功清除，新实例已创建。");
+      new import_obsidian7.Notice("Local Copilot index cleared successfully.");
+      console.log("Local Copilot index cleared successfully, new instance created.");
     } catch (err) {
       console.error("Error clearing the local Copilot index:", err);
-      new import_obsidian7.Notice("清除本地 Copilot 索引时发生错误。");
+      new import_obsidian7.Notice("An error occurred while clearing the local Copilot index.");
       throw err;
     }
   }
@@ -142799,7 +142799,7 @@ var DBOperations = class {
           500
         );
         if (getSettings().debug) {
-          console.log(`已从本地 Copilot 索引中删除文档：${filePath}`);
+          console.log(`Deleted document from local Copilot index: ${filePath}`);
         }
       }
       this.markUnsavedChanges();
@@ -142839,7 +142839,7 @@ var DBOperations = class {
       baseDir = `${prefix}${effectiveRoot}/.copilot-index`;
       if (!await this.app.vault.adapter.exists(baseDir)) {
         await this.app.vault.adapter.mkdir(baseDir);
-        console.log("已创建目录：", baseDir);
+        console.log("Created directory:", baseDir);
       }
     }
     return baseDir;
@@ -143027,14 +143027,14 @@ var DBOperations = class {
     if (prevEmbeddingModel) {
       const currEmbeddingModel = EmbeddingManager.getModelName(embeddingInstance);
       if (!areEmbeddingModelsSame(prevEmbeddingModel, currEmbeddingModel)) {
-        new import_obsidian7.Notice("检测到新的嵌入模型。正在从头重建 Copilot 索引。");
-        console.log("检测到嵌入模型发生变化。正在从头重建 Copilot 索引。");
+        new import_obsidian7.Notice("New embedding model detected. Rebuilding Copilot index from scratch.");
+        console.log("Detected change in embedding model. Rebuilding Copilot index from scratch.");
         this.oramaDb = await this.createNewDb(embeddingInstance);
         await this.saveDB();
         return true;
       }
     } else {
-      console.log("在数据库中找不到以前的嵌入模型。");
+      console.log("No previous embedding model found in the database.");
     }
     return false;
   }
@@ -143059,7 +143059,7 @@ var DBOperations = class {
         return 0;
       }
       console.log(
-        "Copilot 索引：垃圾回收期间要删除的文档：",
+        "Copilot index: Docs to remove during garbage collection:",
         Array.from(new Set(docsToRemove.map((doc) => doc.path))).join(", ")
       );
       if (docsToRemove.length === 1) {
@@ -143185,7 +143185,7 @@ var IndexEventHandler = class {
       }
       this.debounceTimer = window.setTimeout(() => {
         if (getSettings().debug) {
-          console.log("Copilot Plus：触发文件重新索引", file.path);
+          console.log("Copilot Plus: Triggering reindex for file ", file.path);
         }
         this.indexOps.reindexFile(file);
         this.debounceTimer = null;
@@ -143200,7 +143200,7 @@ var IndexEventHandler = class {
   }
   initializeEventListeners() {
     if (getSettings().debug) {
-      console.log("Copilot Plus：初始化事件监听器");
+      console.log("Copilot Plus: Initializing event listeners");
     }
     this.app.vault.on("modify", this.handleFileModify);
     this.app.vault.on("delete", this.handleFileDelete);
@@ -143904,14 +143904,14 @@ var IndexOperations = class {
       }
       const files = await this.getFilesToIndex(overwrite);
       if (files.length === 0) {
-        new import_obsidian9.Notice("Copilot 保管库(Vault)索引是最新的。");
+        new import_obsidian9.Notice("Copilot vault index is up-to-date.");
         return 0;
       }
       this.initializeIndexingState(files.length);
       this.createIndexingNotice();
       const allChunks = await this.prepareAllChunks(files);
       if (allChunks.length === 0) {
-        new import_obsidian9.Notice("没有有效内容可供索引。");
+        new import_obsidian9.Notice("No valid content to index.");
         return 0;
       }
       const errors2 = [];
@@ -143947,7 +143947,7 @@ var IndexOperations = class {
           const currentCheckpoint = Math.floor(this.state.indexedCount / CHECKPOINT_INTERVAL);
           if (currentCheckpoint > previousCheckpoint) {
             await this.dbOps.saveDB();
-            console.log("Copilot 索引检查点保存完成。");
+            console.log("Copilot index checkpoint save completed.");
           }
         } catch (err) {
           console.error("Batch processing error:", {
@@ -143970,7 +143970,7 @@ var IndexOperations = class {
       }
       this.finalizeIndexing(errors2);
       await this.dbOps.saveDB();
-      console.log("Copilot 索引最终保存完成。");
+      console.log("Copilot index final save completed.");
       return this.state.indexedCount;
     } catch (error) {
       this.handleFatalError(error);
@@ -144073,9 +144073,9 @@ NOTE BLOCK CONTENT:
       }
     }
     if (getSettings().debug) {
-      console.log(`要索引的文件：${filesToIndex.size}`);
-      console.log(`之前已索引：${indexedFilePaths.size}`);
-      console.log(`跳过的空文件：${emptyFiles.size}`);
+      console.log(`Files to index: ${filesToIndex.size}`);
+      console.log(`Previously indexed: ${indexedFilePaths.size}`);
+      console.log(`Empty files skipped: ${emptyFiles.size}`);
     }
     return Array.from(filesToIndex);
   }
@@ -144130,14 +144130,14 @@ NOTE BLOCK CONTENT:
       if (!this.state.isIndexingCancelled) {
         const files = await this.getFilesToIndex();
         if (files.length === 0) {
-          console.log("筛选条件更改后没有文件可索引，停止索引");
+          console.log("No files to index after filter change, stopping indexing");
           this.cancelIndexing();
-          new import_obsidian9.Notice("当前筛选条件下没有可索引的文件");
+          new import_obsidian9.Notice("No files to index with current filters");
           return;
         }
         this.state.totalFilesToIndex = files.length;
-        console.log("待索引文件总数：", this.state.totalFilesToIndex);
-        console.log("要索引的文件：", files);
+        console.log("Total files to index:", this.state.totalFilesToIndex);
+        console.log("Files to index:", files);
         this.updateIndexingNoticeMessage();
       }
     }
@@ -144176,13 +144176,13 @@ ${inclusions}`;
       this.state.currentIndexingNotice.hide();
     }
     if (this.state.isIndexingCancelled) {
-      new import_obsidian9.Notice(`索引已取消`);
+      new import_obsidian9.Notice(`Indexing cancelled`);
       return;
     }
     if (errors2.length > 0) {
-      new import_obsidian9.Notice(`索引完成，出现 ${errors2.length} 个错误。请查看控制台以获取详细信息。`);
+      new import_obsidian9.Notice(`Indexing completed with ${errors2.length} errors. Check console for details.`);
     } else {
-      new import_obsidian9.Notice("索引完成成功！");
+      new import_obsidian9.Notice("Indexing completed successfully!");
     }
   }
   handleFatalError(error) {
@@ -144190,7 +144190,7 @@ ${inclusions}`;
     if (this.state.currentIndexingNotice) {
       this.state.currentIndexingNotice.hide();
     }
-    new import_obsidian9.Notice("索引过程中发生致命错误。请检查控制台以获取详细信息。");
+    new import_obsidian9.Notice("Fatal error during indexing. Check console for details.");
   }
   async reindexFile(file) {
     try {
@@ -144223,14 +144223,14 @@ ${inclusions}`;
       }
       this.dbOps.markUnsavedChanges();
       if (getSettings().debug) {
-        console.log(`已重新索引文件：${file.path}`);
+        console.log(`Reindexed file: ${file.path}`);
       }
     } catch (error) {
       console.error(`Error reindexing file ${file.path}:`, error);
     }
   }
   async cancelIndexing() {
-    console.log("索引已由用户取消");
+    console.log("Indexing cancelled by user");
     this.state.isIndexingCancelled = true;
     await new Promise((resolve) => setTimeout(resolve, 100));
     if (this.state.currentIndexingNotice) {
@@ -144292,7 +144292,7 @@ var VectorStoreManager = class {
             }
           }
           new import_obsidian10.Notice(
-            "无法初始化向量存储。请确保您为嵌入模型提供了有效的API密钥，并重新启动插件。"
+            "Failed to initialize vector store. Please make sure you have a valid API key for your embedding model and restart the plugin."
           );
           console.error("Failed to initialize vector store:", error);
           break;
@@ -144309,7 +144309,7 @@ var VectorStoreManager = class {
   async indexVaultToVectorStore(overwrite) {
     await this.waitForInitialization();
     if (import_obsidian10.Platform.isMobile && getSettings().disableIndexOnMobile) {
-      new import_obsidian10.Notice("移动设备上已禁用索引");
+      new import_obsidian10.Notice("Indexing is disabled on mobile devices");
       return 0;
     }
     return this.indexOps.indexVaultToVectorStore(overwrite);
@@ -144516,7 +144516,7 @@ var HybridRetriever = class extends BaseRetriever {
       }));
     }
     if (getSettings().debug) {
-      console.log("*** 混合检索器调试信息： ***");
+      console.log("*** HYBRID RETRIEVER DEBUG INFO: ***");
       if (config?.runName !== "no_hyde") {
         console.log("\nOriginal Query: ", query);
         console.log("Rewritten Query: ", rewrittenQuery);
@@ -144810,7 +144810,7 @@ var localSearchTool = tool(
   },
   {
     name: "localSearch",
-    description: "根据时间范围和查询条件搜索笔记",
+    description: "Search for notes based on the time range and query",
     schema: z.object({
       timeRange: z.object({
         startTime: z.any(),
@@ -144841,7 +144841,7 @@ If success is true, just say it is successful. If 0 files is indexed, say there 
   },
   {
     name: "indexVault",
-    description: "将库索引到 Copilot 索引"
+    description: "Index the vault to the Copilot index"
   }
 );
 var webSearchTool = tool(
@@ -144856,7 +144856,7 @@ var webSearchTool = tool(
   },
   {
     name: "webSearch",
-    description: "搜索网络信息",
+    description: "Search the web for information",
     schema: z.object({
       query: z.string().describe("The search query")
     })
@@ -153984,7 +153984,7 @@ async function getCurrentTime() {
 }
 var getCurrentTimeTool = tool(async () => getCurrentTime(), {
   name: "getCurrentTime",
-  description: "获取当前时间，包括多种格式和时区信息",
+  description: "Get the current time in various formats, including timezone information",
   schema: z.object({})
   // No input required
 });
@@ -154219,7 +154219,7 @@ var getTimeRangeMsTool = tool(
   async ({ timeExpression }) => getTimeRangeMs(timeExpression),
   {
     name: "getTimeRangeMs",
-    description: "根据自然语言时间表达式获取以毫秒为单位的时间范围",
+    description: "Get a time range in milliseconds based on a natural language time expression",
     schema: z.object({
       timeExpression: z.string().describe(
         "A natural language time expression (e.g., 'last week', 'from July 1 to July 15')"
@@ -154236,7 +154236,7 @@ var getTimeInfoByEpochTool = tool(
   async ({ epoch }) => getTimeInfoByEpoch(epoch),
   {
     name: "getTimeInfoByEpoch",
-    description: "将 Unix 时间戳（以秒或毫秒为单位）转换为详细的时间信息",
+    description: "Convert a Unix timestamp (in seconds or milliseconds) to detailed time information",
     schema: z.object({
       epoch: z.number().describe("Unix timestamp in seconds or milliseconds")
     })
@@ -154285,7 +154285,7 @@ var pomodoroTool = tool(
   },
   {
     name: "startPomodoro",
-    description: "启动一个可自定义间隔的番茄钟计时器",
+    description: "Start a Pomodoro timer with a customizable interval",
     schema: z.object({
       interval: z.string().optional().describe("Time interval (e.g., '25min', '5s', '1h'). Default is 25min.")
     })
@@ -154319,7 +154319,7 @@ var simpleYoutubeTranscriptionTool = tool(
   },
   {
     name: "youtubeTranscription",
-    description: "获取 YouTube 视频的字幕",
+    description: "Get the transcript of a YouTube video",
     schema: z.object({
       url: z.string().describe("The YouTube video URL"),
       brevilabsClient: z.any().describe("The BrevilabsClient instance")
@@ -154724,8 +154724,8 @@ IMPORTANT: Maintain consistency with previous responses in the conversation. If 
           toolOutputs
         );
         if (debug4) {
-          console.log("无本地搜索结果。使用标准LLM链。");
-          console.log("好的，请提供需要翻译的英文文本，我将根据插件名称和软件翻译标准，将其翻译为符合中文习惯的简体中文。", enhancedUserMessage);
+          console.log("No local search results. Using standard LLM Chain.");
+          console.log("Enhanced user message:", enhancedUserMessage);
         }
         fullAIResponse = await this.streamMultimodalResponse(
           enhancedUserMessage,
@@ -155121,7 +155121,7 @@ var MemoryManager = class {
       returnMessages: true
     });
     if (this.debug) {
-      console.log("记忆已初始化为上下文轮次", chatContextTurns);
+      console.log("Memory initialized with context turns:", chatContextTurns);
     }
   }
   getMemory() {
@@ -155129,7 +155129,7 @@ var MemoryManager = class {
   }
   async clearChatMemory() {
     if (this.debug)
-      console.log("清除聊天记录");
+      console.log("Clearing chat memory");
     await this.memory.clear();
   }
   async loadMemoryVariables() {
@@ -155215,7 +155215,7 @@ var _ChainManager = class {
     subscribeToModelKeyChange(async () => await this.createChainWithNewModel());
     subscribeToChainTypeChange(
       () => this.setChain(getChainType(), {
-        refreshIndex: getSettings().indexVaultToVectorStore === "ON MODE SWITCH(在模式切换时)" /* ON_MODE_SWITCH */ && (getChainType() === "vault_qa" /* VAULT_QA_CHAIN */ || getChainType() === "copilot_plus" /* COPILOT_PLUS_CHAIN */)
+        refreshIndex: getSettings().indexVaultToVectorStore === "ON MODE SWITCH" /* ON_MODE_SWITCH */ && (getChainType() === "vault_qa" /* VAULT_QA_CHAIN */ || getChainType() === "copilot_plus" /* COPILOT_PLUS_CHAIN */)
       })
     );
     subscribeToSettingsChange(async () => await this.createChainWithNewModel());
@@ -155235,14 +155235,14 @@ var _ChainManager = class {
   }
   validateChatModel() {
     if (!this.chatModelManager.validateChatModel(this.chatModelManager.getChatModel())) {
-      const errorMsg = "聊天模型未正确初始化,请检查 Copilot 设置中的 API 密钥并确保您有 API 访问权限。";
+      const errorMsg = "Chat model is not initialized properly, check your API key in Copilot setting and make sure you have API access.";
       new import_obsidian13.Notice(errorMsg);
       throw new Error(errorMsg);
     }
   }
   validateChainInitialization() {
     if (!_ChainManager.chain || !isSupportedChain(_ChainManager.chain)) {
-      console.error("链条未正确初始化，正在重新初始化链条：", getChainType());
+      console.error("Chain is not initialized properly, re-initializing chain: ", getChainType());
       this.setChain(getChainType());
     }
   }
@@ -155258,7 +155258,7 @@ var _ChainManager = class {
     try {
       let customModel = findCustomModel(newModelKey, getSettings().activeModels);
       if (!customModel) {
-        console.error("重置默认模型。未找到模型配置: ", newModelKey);
+        console.error("Resetting default model. No model configuration found for: ", newModelKey);
         customModel = BUILTIN_CHAT_MODELS[0];
         newModelKey = customModel.name + "|" + customModel.provider;
       }
@@ -155266,13 +155266,13 @@ var _ChainManager = class {
       this.setChain(getChainType());
       console.log(`Setting model to ${newModelKey}`);
     } catch (error) {
-      console.error("createChainWithNewModel 失败: ", error);
+      console.error("createChainWithNewModel failed: ", error);
       console.log("modelKey:", newModelKey);
     }
   }
   async setChain(chainType, options = {}) {
     if (!this.chatModelManager.validateChatModel(this.chatModelManager.getChatModel())) {
-      console.error("设置LLM链时出错:没有设置聊天模型。");
+      console.error("setChain failed: No chat model set.");
       return;
     }
     this.validateChainType(chainType);
@@ -155308,7 +155308,7 @@ var _ChainManager = class {
         );
         setChainType("vault_qa" /* VAULT_QA_CHAIN */);
         if (getSettings().debug) {
-          console.log("为整个保管库(Vault)创建了带有混合检索器的新QA链");
+          console.log("New Vault QA chain with hybrid retriever created for entire vault");
           console.log("Set chain:", "vault_qa" /* VAULT_QA_CHAIN */);
         }
         break;
@@ -155445,76 +155445,76 @@ async function updateChatMemory(messages, memoryManager) {
 
 // src/commands/promptUtils.ts
 function fixGrammarSpellingSelectionPrompt(selectedText) {
-  return `请修正以下文本的语法和拼写错误并原封不动地返回:
+  return `Please fix the grammar and spelling of the following text and return it without any other changes:
 
 ${selectedText}`;
 }
 function summarizePrompt(selectedText) {
-  return `将以下文本总结成要点并原封不动地返回。识别输入语言，并用相同语言返回总结。如果输入是英语，用英语返回总结。否则，用与输入相同的语言返回。只返回总结，不要返回语言名称:
+  return `Summarize the following text into bullet points and return it without any other changes. Identify the input language, and return the summary in the same language. If the input is English, return the summary in English. Otherwise, return in the same language as the input. Return ONLY the summary, DO NOT return the name of the language:
 
 ${selectedText}`;
 }
 function tocPrompt(selectedText) {
-  return `请为以下文本生成目录并原封不动地返回。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please generate a table of contents for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:
 
 ${selectedText}`;
 }
 function glossaryPrompt(selectedText) {
-  return `请为以下文本生成词汇表并原封不动地返回。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please generate a glossary for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:
 
 ${selectedText}`;
 }
 function simplifyPrompt(selectedText) {
-  return `请简化以下文本以便六年级学生能理解。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please simplify the following text so that a 6th-grader can understand. Output in the same language as the source, do not output English if it is not English:
 
 ${selectedText}`;
 }
 function emojifyPrompt(selectedText) {
-  return `请在不改变文本的情况下，在以下内容中尽可能多地插入表情符号，但不要让两个表情符号连在一起。必须返回原始文本。
+  return `Please insert emojis to the following content without changing the text.Insert at as many places as possible, but don't have any 2 emojis together. The original text must be returned.
 Content: ${selectedText}`;
 }
 function removeUrlsFromSelectionPrompt(selectedText) {
-  return `请移除以下文本中的所有网址并原封不动地返回:
+  return `Please remove all URLs from the following text and return it without any other changes:
 
 ${selectedText}`;
 }
 function rewriteTweetSelectionPrompt(selectedText) {
-  return `请用简单的句子重写以下内容，使其不超过280个字符。用与源文本相同的语言输出，如果不是英语则不要输出英语。请严格遵循指示。内容:
+  return `Please rewrite the following content to under 280 characters using simple sentences. Output in the same language as the source, do not output English if it is not English. Please follow the instruction strictly. Content:
 
     + ${selectedText}`;
 }
 function rewriteTweetThreadSelectionPrompt(selectedText) {
-  return `请按照以下步骤仔细操作,并将内容重写成线程。1. 每段不得超过 240 个字符。2. 开始行是 \`THREAD START
-\`, 并且结束行是 \`
-THREAD END\`. 3. 您必须使用 \`
+  return `Please follow the instructions closely step by step and rewrite the content to a thread. 1. Each paragraph must be under 240 characters. 2. The starting line is \`THREAD START
+\`, and the ending line is \`
+THREAD END\`. 3. You must use \`
 
 ---
 
-\` 来分隔每个段落！然后原封不动地返回。4. 尽可能使它具有吸引力。5. 用与源文本相同的语言输出，如果不是英语则不要输出英语。
- 原始内容:
+\` to separate each paragraph! Then return it without any other changes. 4. Make it as engaging as possible.5. Output in the same language as the source, do not output English if it is not English.
+ The original content:
 
 ${selectedText}`;
 }
 function rewriteShorterSelectionPrompt(selectedText) {
-  return `请重写以下文本，使其长度减半，同时尽可能保留意义。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please rewrite the following text to make it half as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:
 ${selectedText}`;
 }
 function rewriteLongerSelectionPrompt(selectedText) {
-  return `请重写以下文本，使其长度增加一倍，同时尽可能保留意义。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please rewrite the following text to make it twice as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:
 ${selectedText}`;
 }
 function eli5SelectionPrompt(selectedText) {
-  return `请像解释给五岁孩子一样解释以下文本。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please explain the following text like I'm 5 years old. Output in the same language as the source, do not output English if it is not English:
 
 ${selectedText}`;
 }
 function rewritePressReleaseSelectionPrompt(selectedText) {
-  return `请重写以下文本，使其听起来像新闻稿。用与源文本相同的语言输出，如果不是英语则不要输出英语:
+  return `Please rewrite the following text to make it sound like a press release. Output in the same language as the source, do not output English if it is not English:
 
 ${selectedText}`;
 }
 function translateSelectionPrompt(selectedText, language) {
-  return `请将以下文本翻译成 ${language}:
+  return `Please translate the following text to ${language}:
 
 ${selectedText}`;
 }
@@ -155546,14 +155546,14 @@ var import_obsidian14 = require("obsidian");
 var AddPromptModal = class extends import_obsidian14.Modal {
   constructor(app2, onSave, initialTitle = "", initialPrompt = "", disabledTitle) {
     super(app2);
-    this.contentEl.createEl("h2", { text: "用户自定义聊天提示词" });
+    this.contentEl.createEl("h2", { text: "User Custom Prompt" });
     const formContainer = this.contentEl.createEl("div", { cls: "copilot-command-modal" });
     const titleContainer = formContainer.createEl("div", {
       cls: "copilot-command-input-container"
     });
-    titleContainer.createEl("h3", { text: "标题", cls: "copilot-command-header" });
+    titleContainer.createEl("h3", { text: "Title", cls: "copilot-command-header" });
     titleContainer.createEl("p", {
-      text: "聊天提示词的标题,必须是唯一的。",
+      text: "The title of the prompt, must be unique.",
       cls: "copilot-command-input-description"
     });
     const titleField = titleContainer.createEl("input", { type: "text" });
@@ -155566,22 +155566,22 @@ var AddPromptModal = class extends import_obsidian14.Modal {
     const promptContainer = formContainer.createEl("div", {
       cls: "copilot-command-input-container"
     });
-    promptContainer.createEl("h3", { text: "聊天提示词", cls: "copilot-command-header" });
+    promptContainer.createEl("h3", { text: "Prompt", cls: "copilot-command-header" });
     const promptDescFragment = createFragment((frag) => {
-      frag.createEl("strong", { text: "- {} 代表所选文本(非必需)。" });
+      frag.createEl("strong", { text: "- {} represents the selected text (not required). " });
       frag.createEl("br");
-      frag.createEl("strong", { text: "- {[[笔记标题]]} 代表一个笔记。" });
+      frag.createEl("strong", { text: "- {[[Note Title]]} represents a note. " });
       frag.createEl("br");
-      frag.createEl("strong", { text: "- {activeNote} 代表活动笔记。" });
+      frag.createEl("strong", { text: "- {activeNote} represents the active note. " });
       frag.createEl("br");
-      frag.createEl("strong", { text: "- {FolderPath} 代表一个笔记文件夹。" });
+      frag.createEl("strong", { text: "- {FolderPath} represents a folder of notes. " });
       frag.createEl("br");
       frag.createEl("strong", {
-        text: "- {#tag1, #tag2} 代表所有具有指定标签中的任何一个标签的笔记(或操作)。"
+        text: "- {#tag1, #tag2} represents ALL notes with ANY of the specified tags in their property (an OR operation). "
       });
       frag.createEl("br");
       frag.createEl("br");
-      frag.appendText("Tip：打开调试模式，会在聊天窗口中显示已处理过的聊天提示词。");
+      frag.appendText("Tip: turn on debug mode to show the processed prompt in the chat window.");
       frag.createEl("br");
       frag.createEl("br");
     });
@@ -155592,16 +155592,16 @@ var AddPromptModal = class extends import_obsidian14.Modal {
     }
     const descFragment = createFragment((frag) => {
       frag.appendText(
-        "将聊天提示词保存到本地聊天提示词库，然后，您可以将其与Copilot命令一起使用："
+        "Save the prompt to the local prompt library. You can then use it with the Copilot command: "
       );
-      frag.createEl("strong", { text: "将自定义聊天提示词应用于选择。" });
+      frag.createEl("strong", { text: "Apply custom prompt to selection." });
       frag.createEl("br");
-      frag.appendText("查看 ");
+      frag.appendText("Check out the ");
       frag.createEl("a", {
         href: "https://github.com/f/awesome-chatgpt-prompts",
-        text: "超赞的 chatGPT 聊天提示词"
+        text: "awesome chatGPT prompts"
       }).setAttr("target", "_blank");
-      frag.appendText("为获得灵感");
+      frag.appendText(" for inspiration.");
     });
     const descContainer = promptContainer.createEl("p", {
       cls: "copilot-command-input-description"
@@ -155611,7 +155611,7 @@ var AddPromptModal = class extends import_obsidian14.Modal {
       cls: "copilot-command-save-btn-container"
     });
     const saveButton = saveButtonContainer.createEl("button", {
-      text: "保存",
+      text: "Save",
       cls: "copilot-command-save-btn"
     });
     saveButton.addEventListener("click", () => {
@@ -155619,7 +155619,7 @@ var AddPromptModal = class extends import_obsidian14.Modal {
         onSave(titleField.value, promptField.value);
         this.close();
       } else {
-        new import_obsidian14.Notice("请同时填写两个字段：标题和聊天提示词");
+        new import_obsidian14.Notice("Please fill in both fields: Title and Prompt.");
       }
     });
   }
@@ -155630,26 +155630,26 @@ var import_obsidian15 = require("obsidian");
 var AdhocPromptModal = class extends import_obsidian15.Modal {
   constructor(app2, onSubmit) {
     super(app2);
-    this.placeholderText = "请在这里输入您的自定义即时聊天提示词,按回车发送。";
+    this.placeholderText = "Please enter your custom ad-hoc prompt here, press enter to send.";
     this.onSubmit = onSubmit;
   }
   onOpen() {
     const { contentEl } = this;
     const promptDescFragment = createFragment((frag) => {
-      frag.createEl("strong", { text: "- {} 代表所选文本(非必需)。" });
+      frag.createEl("strong", { text: "- {} represents the selected text (not required). " });
       frag.createEl("br");
-      frag.createEl("strong", { text: "- {[[笔记标题]]} 代表一个笔记。" });
+      frag.createEl("strong", { text: "- {[[Note Title]]} represents a note. " });
       frag.createEl("br");
-      frag.createEl("strong", { text: "- {activeNote} 代表活动笔记。" });
+      frag.createEl("strong", { text: "- {activeNote} represents the active note. " });
       frag.createEl("br");
-      frag.createEl("strong", { text: "- {FolderPath} 代表一个笔记文件夹。" });
+      frag.createEl("strong", { text: "- {FolderPath} represents a folder of notes. " });
       frag.createEl("br");
       frag.createEl("strong", {
-        text: "- {#tag1, #tag2} 代表所有具有指定标签中的任何一个标签的笔记(或操作)。"
+        text: "- {#tag1, #tag2} represents ALL notes with ANY of the specified tags in their property (an OR operation). "
       });
       frag.createEl("br");
       frag.createEl("br");
-      frag.appendText("Tip：打开调试模式，会在聊天窗口中显示已处理过的聊天提示词。");
+      frag.appendText("Tip: turn on debug mode to show the processed prompt in the chat window.");
       frag.createEl("br");
       frag.createEl("br");
     });
@@ -156306,8 +156306,8 @@ var InlineEditModal = class extends import_obsidian17.Modal {
 // src/components/modals/LanguageModal.tsx
 var import_obsidian18 = require("obsidian");
 var LANGUAGES = [
-  { code: "en", name: "英语" },
-  { code: "zh", name: "中文" },
+  { code: "en", name: "English" },
+  { code: "zh", name: "Chinese" },
   { code: "ja", name: "Japanese" },
   { code: "ko", name: "Korean" },
   { code: "es", name: "Spanish" },
@@ -156408,7 +156408,7 @@ var OramaSearchModal = class extends import_obsidian20.Modal {
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h2", { text: "按笔记路径检查 Copilot 索引" });
+    contentEl.createEl("h2", { text: "Inspect Copilot Index by Note Paths" });
     this.searchInput = contentEl.createEl("textarea", {
       attr: {
         placeholder: "Enter note paths as markdown list:\n- [[Note 1]]\n- [[Note 2]]",
@@ -156418,14 +156418,14 @@ var OramaSearchModal = class extends import_obsidian20.Modal {
     });
     const buttonContainer = contentEl.createEl("div", { cls: "search-button-container" });
     const searchButton = buttonContainer.createEl("button", {
-      text: "显示索引数据",
+      text: "Show Index Data",
       cls: "mod-cta"
     });
     searchButton.addEventListener("click", async () => {
       const input = this.searchInput.value;
       const notePaths = extractNoteTitles(input);
       if (notePaths.length === 0) {
-        new import_obsidian20.Notice("未找到有效的笔记路径。请使用格式：- [[笔记名称]]");
+        new import_obsidian20.Notice("No valid note paths found. Use format: - [[Note Name]]");
         return;
       }
       try {
@@ -156454,7 +156454,7 @@ var OramaSearchModal = class extends import_obsidian20.Modal {
         this.close();
       } catch (error) {
         console.error("Error searching DB:", error);
-        new import_obsidian20.Notice("搜索数据库时出错。请检查控制台以获取详细信息。");
+        new import_obsidian20.Notice("Error searching database. Check console for details.");
       }
     });
   }
@@ -156474,10 +156474,10 @@ var RemoveFromIndexModal = class extends import_obsidian21.Modal {
   }
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("h2", { text: "从 Copilot 索引中移除文件" });
+    contentEl.createEl("h2", { text: "Remove Files from Copilot Index" });
     const container = contentEl.createDiv({ cls: "remove-files-container" });
     new import_obsidian21.Setting(container).setName("File paths").setDesc(
-      "粘贴要从索引中删除的文件路径的 Markdown 列表。你可以通过运行命令 `列出所有已索引文件` 来获取该列表。"
+      "Paste the markdown list of file paths to remove from the index. You can get the list by running the command `List all indexed files`."
     ).setClass("remove-files-setting").addTextArea(
       (text) => text.setPlaceholder("- [[path/to/file1.md]]\n- [[path/to/file2.md]]").setValue(this.filePaths).onChange((value) => {
         this.filePaths = value;
@@ -156667,7 +156667,7 @@ var CustomPromptProcessor = class {
             notes.push({ name: getFileName(activeNote), content });
           }
         } else {
-          new import_obsidian23.Notice("未找到激活的文档");
+          new import_obsidian23.Notice("No active note found.");
         }
       } else if (variableName.startsWith("#")) {
         const tagNames = variableName.slice(1).split(",").map((tag) => tag.trim());
@@ -156871,7 +156871,7 @@ function registerBuiltInCommands(plugin) {
   addEditorCommand(plugin, COMMAND_IDS.TRANSLATE, (editor) => {
     new LanguageModal(plugin.app, (language) => {
       if (!language) {
-        new import_obsidian24.Notice("请选择一种语言。");
+        new import_obsidian24.Notice("Please select a language.");
         return;
       }
       processInlineEditCommand(plugin, editor, COMMAND_IDS.TRANSLATE, language);
@@ -156880,7 +156880,7 @@ function registerBuiltInCommands(plugin) {
   addEditorCommand(plugin, COMMAND_IDS.CHANGE_TONE, (editor) => {
     new ToneModal(plugin.app, (tone) => {
       if (!tone) {
-        new import_obsidian24.Notice("请选中一种对话风格/语气。");
+        new import_obsidian24.Notice("Please select a tone.");
         return;
       }
       processInlineEditCommand(plugin, editor, COMMAND_IDS.CHANGE_TONE, tone);
@@ -156896,9 +156896,9 @@ function registerBuiltInCommands(plugin) {
     try {
       const allContent = await getAllQAMarkdownContent(plugin.app);
       const totalTokens = await plugin.chainManager.chatModelManager.countTokens(allContent);
-      new import_obsidian24.Notice(`您的保管库(Vault)中的Tokens总数:${totalTokens}`);
+      new import_obsidian24.Notice(`Total tokens in your vault: ${totalTokens}`);
     } catch (error) {
-      console.error("计数Token时出错:", error);
+      console.error("Error counting tokens: ", error);
       new import_obsidian24.Notice("An error occurred while counting tokens.");
     }
   });
@@ -156912,9 +156912,9 @@ function registerBuiltInCommands(plugin) {
     new AddPromptModal(plugin.app, async (title, prompt) => {
       try {
         await promptProcessor.savePrompt(title, prompt);
-        new import_obsidian24.Notice("自定义聊天提示词已成功保存。");
+        new import_obsidian24.Notice("Custom prompt saved successfully.");
       } catch (e3) {
-        new import_obsidian24.Notice("保存自定义聊天提示词时出错，请检查标题是否已存在。");
+        new import_obsidian24.Notice("Error saving custom prompt. Please check if the title already exists.");
         console.error(e3);
       }
     }).open();
@@ -156924,19 +156924,19 @@ function registerBuiltInCommands(plugin) {
     const promptTitles = prompts.map((p3) => p3.title);
     new ListPromptModal(plugin.app, promptTitles, async (promptTitle) => {
       if (!promptTitle) {
-        new import_obsidian24.Notice("请选择一个聊天提示词的标题");
+        new import_obsidian24.Notice("Please select a prompt title.");
         return;
       }
       try {
         const prompt = await promptProcessor.getPrompt(promptTitle);
         if (!prompt) {
-          new import_obsidian24.Notice(`未找到标题为"${promptTitle}"的聊天提示词。`);
+          new import_obsidian24.Notice(`No prompt found with the title "${promptTitle}".`);
           return;
         }
         plugin.processCustomPrompt(COMMAND_IDS.APPLY_CUSTOM_PROMPT, prompt.content);
       } catch (err) {
         console.error(err);
-        new import_obsidian24.Notice("发生了一个错误。");
+        new import_obsidian24.Notice("An error occurred.");
       }
     }).open();
   });
@@ -156946,7 +156946,7 @@ function registerBuiltInCommands(plugin) {
         plugin.processCustomPrompt(COMMAND_IDS.APPLY_ADHOC_PROMPT, adhocPrompt);
       } catch (err) {
         console.error(err);
-        new import_obsidian24.Notice("发生了一个错误。");
+        new import_obsidian24.Notice("An error occurred.");
       }
     });
     modal.open();
@@ -156959,15 +156959,15 @@ function registerBuiltInCommands(plugin) {
       const promptTitles = prompts.map((p3) => p3.title);
       new ListPromptModal(plugin.app, promptTitles, async (promptTitle) => {
         if (!promptTitle) {
-          new import_obsidian24.Notice("请选择一个聊天提示词的标题");
+          new import_obsidian24.Notice("Please select a prompt title.");
           return;
         }
         try {
           await promptProcessor.deletePrompt(promptTitle);
-          new import_obsidian24.Notice(`聊天提示词"${promptTitle}"已被删除。`);
+          new import_obsidian24.Notice(`Prompt "${promptTitle}" has been deleted.`);
         } catch (err) {
           console.error(err);
-          new import_obsidian24.Notice("删除聊天提示词时出错。");
+          new import_obsidian24.Notice("An error occurred while deleting the prompt.");
         }
       }).open();
     });
@@ -156981,7 +156981,7 @@ function registerBuiltInCommands(plugin) {
       const promptTitles = prompts.map((p3) => p3.title);
       new ListPromptModal(plugin.app, promptTitles, async (promptTitle) => {
         if (!promptTitle) {
-          new import_obsidian24.Notice("请选择一个聊天提示词的标题");
+          new import_obsidian24.Notice("Please select a prompt title.");
           return;
         }
         try {
@@ -156992,13 +156992,13 @@ function registerBuiltInCommands(plugin) {
               async (title, newPrompt) => {
                 try {
                   await promptProcessor.updatePrompt(promptTitle, title, newPrompt);
-                  new import_obsidian24.Notice(`聊天提示词"${title}"已更新。`);
+                  new import_obsidian24.Notice(`Prompt "${title}" has been updated.`);
                 } catch (err) {
                   console.error(err);
                   if (err instanceof CustomError) {
                     new import_obsidian24.Notice(err.message);
                   } else {
-                    new import_obsidian24.Notice("发生了一个错误。");
+                    new import_obsidian24.Notice("An error occurred.");
                   }
                 }
               },
@@ -157007,11 +157007,11 @@ function registerBuiltInCommands(plugin) {
               false
             ).open();
           } else {
-            new import_obsidian24.Notice(`未找到标题为"${promptTitle}"的聊天提示词。`);
+            new import_obsidian24.Notice(`No prompt found with the title "${promptTitle}".`);
           }
         } catch (err) {
           console.error(err);
-          new import_obsidian24.Notice("发生了一个错误。");
+          new import_obsidian24.Notice("An error occurred.");
         }
       }).open();
     });
@@ -157023,28 +157023,28 @@ function registerBuiltInCommands(plugin) {
   addCommand(plugin, COMMAND_IDS.GARBAGE_COLLECT_COPILOT_INDEX, async () => {
     try {
       const removedDocs = await plugin.vectorStoreManager.garbageCollectVectorStore();
-      new import_obsidian24.Notice(`从 Copilot 索引中移除了 ${removedDocs} 个文档。`);
+      new import_obsidian24.Notice(`${removedDocs} documents removed from Copilot index.`);
     } catch (err) {
       console.error("Error garbage collecting the Copilot index:", err);
-      new import_obsidian24.Notice("清理 Copilot 索引时发生错误。");
+      new import_obsidian24.Notice("An error occurred while garbage collecting the Copilot index.");
     }
   });
   addCommand(plugin, COMMAND_IDS.INDEX_VAULT_TO_COPILOT_INDEX, async () => {
     try {
       const indexedFileCount = await plugin.vectorStoreManager.indexVaultToVectorStore();
-      new import_obsidian24.Notice(`${indexedFileCount} 个库文件已索引到 Copilot 索引中。`);
+      new import_obsidian24.Notice(`${indexedFileCount} vault files indexed to Copilot index.`);
     } catch (err) {
       console.error("Error indexing vault to Copilot index:", err);
-      new import_obsidian24.Notice("在将保险库索引到Copilot索引时发生错误。");
+      new import_obsidian24.Notice("An error occurred while indexing vault to Copilot index.");
     }
   });
   addCommand(plugin, COMMAND_IDS.FORCE_REINDEX_VAULT_TO_COPILOT_INDEX, async () => {
     try {
       const indexedFileCount = await plugin.vectorStoreManager.indexVaultToVectorStore(true);
-      new import_obsidian24.Notice(`${indexedFileCount} 个库文件已重新索引到 Copilot 索引。`);
+      new import_obsidian24.Notice(`${indexedFileCount} vault files re-indexed to Copilot index.`);
     } catch (err) {
       console.error("Error re-indexing vault to Copilot index:", err);
-      new import_obsidian24.Notice("重新索引保险库到Copilot索引时发生错误。");
+      new import_obsidian24.Notice("An error occurred while re-indexing vault to Copilot index.");
     }
   });
   addCommand(plugin, COMMAND_IDS.LOAD_COPILOT_CHAT_CONVERSATION, () => {
@@ -157079,7 +157079,7 @@ function registerBuiltInCommands(plugin) {
         }
       }
       if (indexedFiles.length === 0 && emptyFiles.size === 0 && unindexedFiles.size === 0) {
-        new import_obsidian24.Notice("未找到可列出的文件。");
+        new import_obsidian24.Notice("No files found to list.");
         return;
       }
       const content = [
@@ -157112,11 +157112,11 @@ function registerBuiltInCommands(plugin) {
       const file = plugin.app.vault.getAbstractFileByPath(filePath);
       if (file instanceof import_obsidian24.TFile) {
         await plugin.app.workspace.getLeaf().openFile(file);
-        new import_obsidian24.Notice(`已列出 ${indexedFiles.length} 个索引文件`);
+        new import_obsidian24.Notice(`Listed ${indexedFiles.length} indexed files`);
       }
     } catch (error) {
       console.error("Error listing indexed files:", error);
-      new import_obsidian24.Notice("无法列出索引文件。");
+      new import_obsidian24.Notice("Failed to list indexed files.");
     }
   });
   addCommand(plugin, COMMAND_IDS.REMOVE_FILES_FROM_COPILOT_INDEX, async () => {
@@ -157127,10 +157127,10 @@ function registerBuiltInCommands(plugin) {
           await dbOps.removeDocs(path);
         }
         await dbOps.saveDB();
-        new import_obsidian24.Notice(`成功从索引中移除了 ${filePaths.length} 个文件。`);
+        new import_obsidian24.Notice(`Successfully removed ${filePaths.length} files from the index.`);
       } catch (err) {
         console.error("Error removing files from index:", err);
-        new import_obsidian24.Notice("从索引中移除文件时发生错误。");
+        new import_obsidian24.Notice("An error occurred while removing files from the index.");
       }
     }).open();
   });
@@ -167219,16 +167219,16 @@ var import_obsidian25 = require("obsidian");
 async function refreshVaultIndex() {
   try {
     await VectorStoreManager.getInstance().indexVaultToVectorStore();
-    new import_obsidian25.Notice("保管库(Vault)中的索引已刷新。");
+    new import_obsidian25.Notice("Vault index refreshed.");
   } catch (error) {
     console.error("Error refreshing vault index:", error);
-    new import_obsidian25.Notice("刷新保管库(Vault)的索引失败。查看控制台了解详细信息。");
+    new import_obsidian25.Notice("Failed to refresh vault index. Check console for details.");
   }
 }
 function ChatControls({ onNewChat, onSaveAsNote }) {
   const settings = useSettingsValue();
   const [selectedChain, setSelectedChain] = useChainType();
-  return /* @__PURE__ */ import_react9.default.createElement("div", { className: "w-full py-1 flex justify-between items-center px-1" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "flex-1" }, /* @__PURE__ */ import_react9.default.createElement(DropdownMenu, null, /* @__PURE__ */ import_react9.default.createElement(DropdownMenuTrigger, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "fit", className: "ml-1" }, selectedChain === "llm_chain" /* LLM_CHAIN */ && "chat", selectedChain === "vault_qa" /* VAULT_QA_CHAIN */ && "vault QA (basic)", selectedChain === "copilot_plus" /* COPILOT_PLUS_CHAIN */ && "copilot plus (beta)", /* @__PURE__ */ import_react9.default.createElement(ChevronDown, { className: "size-5 mt-0.5" }))), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuContent2, { align: "start" }, /* @__PURE__ */ import_react9.default.createElement(DropdownMenuItem2, { onSelect: () => setSelectedChain("llm_chain" /* LLM_CHAIN */) }, "chat"), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuItem2, { onSelect: () => setSelectedChain("vault_qa" /* VAULT_QA_CHAIN */) }, "vault QA (basic)"), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuItem2, { onSelect: () => setSelectedChain("copilot_plus" /* COPILOT_PLUS_CHAIN */) }, "copilot plus (beta)")))), /* @__PURE__ */ import_react9.default.createElement("div", null, /* @__PURE__ */ import_react9.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react9.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "icon", title: "新聊天", onClick: onNewChat }, /* @__PURE__ */ import_react9.default.createElement(MessageCirclePlus, { className: "size-4" }))), /* @__PURE__ */ import_react9.default.createElement(TooltipContent2, null, "新聊天")), /* @__PURE__ */ import_react9.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react9.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "icon", title: "Save Chat as Note", onClick: onSaveAsNote }, /* @__PURE__ */ import_react9.default.createElement(Download, { className: "size-4" }))), /* @__PURE__ */ import_react9.default.createElement(TooltipContent2, null, "Save Chat as Note")), /* @__PURE__ */ import_react9.default.createElement(DropdownMenu, null, /* @__PURE__ */ import_react9.default.createElement(DropdownMenuTrigger, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "icon", title: "Advanced Settings" }, /* @__PURE__ */ import_react9.default.createElement(Ellipsis, { className: "size-4" }))), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuContent2, { align: "end", className: "w-64" }, /* @__PURE__ */ import_react9.default.createElement(
+  return /* @__PURE__ */ import_react9.default.createElement("div", { className: "w-full py-1 flex justify-between items-center px-1" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "flex-1" }, /* @__PURE__ */ import_react9.default.createElement(DropdownMenu, null, /* @__PURE__ */ import_react9.default.createElement(DropdownMenuTrigger, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "fit", className: "ml-1" }, selectedChain === "llm_chain" /* LLM_CHAIN */ && "chat", selectedChain === "vault_qa" /* VAULT_QA_CHAIN */ && "vault QA (basic)", selectedChain === "copilot_plus" /* COPILOT_PLUS_CHAIN */ && "copilot plus (beta)", /* @__PURE__ */ import_react9.default.createElement(ChevronDown, { className: "size-5 mt-0.5" }))), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuContent2, { align: "start" }, /* @__PURE__ */ import_react9.default.createElement(DropdownMenuItem2, { onSelect: () => setSelectedChain("llm_chain" /* LLM_CHAIN */) }, "chat"), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuItem2, { onSelect: () => setSelectedChain("vault_qa" /* VAULT_QA_CHAIN */) }, "vault QA (basic)"), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuItem2, { onSelect: () => setSelectedChain("copilot_plus" /* COPILOT_PLUS_CHAIN */) }, "copilot plus (beta)")))), /* @__PURE__ */ import_react9.default.createElement("div", null, /* @__PURE__ */ import_react9.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react9.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "icon", title: "New Chat", onClick: onNewChat }, /* @__PURE__ */ import_react9.default.createElement(MessageCirclePlus, { className: "size-4" }))), /* @__PURE__ */ import_react9.default.createElement(TooltipContent2, null, "New Chat")), /* @__PURE__ */ import_react9.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react9.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "icon", title: "Save Chat as Note", onClick: onSaveAsNote }, /* @__PURE__ */ import_react9.default.createElement(Download, { className: "size-4" }))), /* @__PURE__ */ import_react9.default.createElement(TooltipContent2, null, "Save Chat as Note")), /* @__PURE__ */ import_react9.default.createElement(DropdownMenu, null, /* @__PURE__ */ import_react9.default.createElement(DropdownMenuTrigger, { asChild: true }, /* @__PURE__ */ import_react9.default.createElement(Button, { variant: "ghost2", size: "icon", title: "Advanced Settings" }, /* @__PURE__ */ import_react9.default.createElement(Ellipsis, { className: "size-4" }))), /* @__PURE__ */ import_react9.default.createElement(DropdownMenuContent2, { align: "end", className: "w-64" }, /* @__PURE__ */ import_react9.default.createElement(
     DropdownMenuItem2,
     {
       className: "flex justify-between",
@@ -170434,17 +170434,17 @@ var ChatButtons = ({
         "group-hover:opacity-100 opacity-0": !import_obsidian29.Platform.isMobile
       })
     },
-    /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { variant: "ghost2", size: "fit", onClick: onCopy, title: "复制" }, isCopied ? /* @__PURE__ */ import_react14.default.createElement(Check, { className: "size-4" }) : /* @__PURE__ */ import_react14.default.createElement(Copy, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Copy")),
-    message.sender === USER_SENDER ? /* @__PURE__ */ import_react14.default.createElement(import_react14.default.Fragment, null, /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onEdit, variant: "ghost2", size: "fit", title: "编辑" }, /* @__PURE__ */ import_react14.default.createElement(SquarePen, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Edit")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onDelete, variant: "ghost2", size: "fit", title: "Delete" }, /* @__PURE__ */ import_react14.default.createElement(Trash2, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "删除"))) : /* @__PURE__ */ import_react14.default.createElement(import_react14.default.Fragment, null, hasSources && /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onShowSources, variant: "ghost2", size: "fit", title: "Show Sources" }, /* @__PURE__ */ import_react14.default.createElement(LibraryBig, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Show Sources")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(
+    /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { variant: "ghost2", size: "fit", onClick: onCopy, title: "Copy" }, isCopied ? /* @__PURE__ */ import_react14.default.createElement(Check, { className: "size-4" }) : /* @__PURE__ */ import_react14.default.createElement(Copy, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Copy")),
+    message.sender === USER_SENDER ? /* @__PURE__ */ import_react14.default.createElement(import_react14.default.Fragment, null, /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onEdit, variant: "ghost2", size: "fit", title: "Edit" }, /* @__PURE__ */ import_react14.default.createElement(SquarePen, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Edit")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onDelete, variant: "ghost2", size: "fit", title: "Delete" }, /* @__PURE__ */ import_react14.default.createElement(Trash2, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Delete"))) : /* @__PURE__ */ import_react14.default.createElement(import_react14.default.Fragment, null, hasSources && /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onShowSources, variant: "ghost2", size: "fit", title: "Show Sources" }, /* @__PURE__ */ import_react14.default.createElement(LibraryBig, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Show Sources")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(
       Button,
       {
         onClick: onInsertIntoEditor,
         variant: "ghost2",
         size: "fit",
-        title: "插入到笔记中的光标位置"
+        title: "Insert to note at cursor"
       },
       /* @__PURE__ */ import_react14.default.createElement(TextCursorInput, { className: "size-4" })
-    )), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Insert to note at cursor")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onRegenerate, variant: "ghost2", size: "fit", title: "重新生成" }, /* @__PURE__ */ import_react14.default.createElement(RotateCw, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Regenerate")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onDelete, variant: "ghost2", size: "fit", title: "Delete" }, /* @__PURE__ */ import_react14.default.createElement(Trash2, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "删除")))
+    )), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Insert to note at cursor")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onRegenerate, variant: "ghost2", size: "fit", title: "Regenerate" }, /* @__PURE__ */ import_react14.default.createElement(RotateCw, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Regenerate")), /* @__PURE__ */ import_react14.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react14.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: onDelete, variant: "ghost2", size: "fit", title: "Delete" }, /* @__PURE__ */ import_react14.default.createElement(Trash2, { className: "size-4" }))), /* @__PURE__ */ import_react14.default.createElement(TooltipContent2, null, "Delete")))
   );
 };
 
@@ -172912,7 +172912,7 @@ var RelevantNotes = (0, import_react17.memo)(
           className
         )
       },
-      /* @__PURE__ */ import_react17.default.createElement(Collapsible2, { open: isOpen, onOpenChange: setIsOpen }, /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex justify-between items-center pl-1 pb-2" }, /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex gap-2 items-center flex-1" }, /* @__PURE__ */ import_react17.default.createElement("span", { className: "font-semibold text-normal" }, "相关笔记"), /* @__PURE__ */ import_react17.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react17.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(Info2, { className: "size-4 text-muted" })), /* @__PURE__ */ import_react17.default.createElement(TooltipContent2, { side: "bottom", className: "w-64" }, "相关性是语义相似性和链接的结合。")), !hasIndex && /* @__PURE__ */ import_react17.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react17.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(TriangleAlert, { className: "size-4 text-warning" })), /* @__PURE__ */ import_react17.default.createElement(TooltipContent2, { side: "bottom" }, "Note has not been indexed"))), /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ import_react17.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react17.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(Button, { variant: "ghost2", size: "icon", onClick: refreshIndex }, /* @__PURE__ */ import_react17.default.createElement(RefreshCcw, { className: "size-4" }))), /* @__PURE__ */ import_react17.default.createElement(TooltipContent2, { side: "bottom" }, "Reindex Current Note")), relevantNotes.length > 0 && /* @__PURE__ */ import_react17.default.createElement(CollapsibleTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(Button, { variant: "ghost2", size: "icon" }, isOpen ? /* @__PURE__ */ import_react17.default.createElement(ChevronUp, { className: "size-5" }) : /* @__PURE__ */ import_react17.default.createElement(ChevronDown, { className: "size-5" }))))), relevantNotes.length === 0 && /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex flex-wrap gap-x-2 gap-y-1 max-h-12 overflow-y-hidden px-1" }, /* @__PURE__ */ import_react17.default.createElement("span", { className: "text-xs text-muted" }, "未找到相关笔记")), !isOpen && relevantNotes.length > 0 && /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex flex-wrap gap-x-2 gap-y-1 max-h-6 overflow-y-hidden px-1" }, relevantNotes.map((note) => /* @__PURE__ */ import_react17.default.createElement(
+      /* @__PURE__ */ import_react17.default.createElement(Collapsible2, { open: isOpen, onOpenChange: setIsOpen }, /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex justify-between items-center pl-1 pb-2" }, /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex gap-2 items-center flex-1" }, /* @__PURE__ */ import_react17.default.createElement("span", { className: "font-semibold text-normal" }, "Relevant Notes"), /* @__PURE__ */ import_react17.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react17.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(Info2, { className: "size-4 text-muted" })), /* @__PURE__ */ import_react17.default.createElement(TooltipContent2, { side: "bottom", className: "w-64" }, "Relevance is a combination of semantic similarity and links.")), !hasIndex && /* @__PURE__ */ import_react17.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react17.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(TriangleAlert, { className: "size-4 text-warning" })), /* @__PURE__ */ import_react17.default.createElement(TooltipContent2, { side: "bottom" }, "Note has not been indexed"))), /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ import_react17.default.createElement(Tooltip2, null, /* @__PURE__ */ import_react17.default.createElement(TooltipTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(Button, { variant: "ghost2", size: "icon", onClick: refreshIndex }, /* @__PURE__ */ import_react17.default.createElement(RefreshCcw, { className: "size-4" }))), /* @__PURE__ */ import_react17.default.createElement(TooltipContent2, { side: "bottom" }, "Reindex Current Note")), relevantNotes.length > 0 && /* @__PURE__ */ import_react17.default.createElement(CollapsibleTrigger2, { asChild: true }, /* @__PURE__ */ import_react17.default.createElement(Button, { variant: "ghost2", size: "icon" }, isOpen ? /* @__PURE__ */ import_react17.default.createElement(ChevronUp, { className: "size-5" }) : /* @__PURE__ */ import_react17.default.createElement(ChevronDown, { className: "size-5" }))))), relevantNotes.length === 0 && /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex flex-wrap gap-x-2 gap-y-1 max-h-12 overflow-y-hidden px-1" }, /* @__PURE__ */ import_react17.default.createElement("span", { className: "text-xs text-muted" }, "No relevant notes found")), !isOpen && relevantNotes.length > 0 && /* @__PURE__ */ import_react17.default.createElement("div", { className: "flex flex-wrap gap-x-2 gap-y-1 max-h-6 overflow-y-hidden px-1" }, relevantNotes.map((note) => /* @__PURE__ */ import_react17.default.createElement(
         RelevantNotePopover,
         {
           key: note.document.path,
@@ -173058,7 +173058,7 @@ var SuggestedPrompts = ({ onClick }) => {
   const prompts = (0, import_react18.useMemo)(() => getRandomPrompt(chainType), [chainType]);
   const settings = useSettingsValue();
   const indexVaultToVectorStore = settings.indexVaultToVectorStore;
-  return /* @__PURE__ */ import_react18.default.createElement("div", { className: "flex flex-col gap-4" }, /* @__PURE__ */ import_react18.default.createElement(Card, { className: "w-full bg-transparent" }, /* @__PURE__ */ import_react18.default.createElement(CardHeader, { className: "px-2" }, /* @__PURE__ */ import_react18.default.createElement(CardTitle, null, "建议提示")), /* @__PURE__ */ import_react18.default.createElement(CardContent, { className: "p-2 pt-0" }, /* @__PURE__ */ import_react18.default.createElement("div", { className: "flex flex-col gap-2" }, prompts.map((prompt, i3) => /* @__PURE__ */ import_react18.default.createElement(
+  return /* @__PURE__ */ import_react18.default.createElement("div", { className: "flex flex-col gap-4" }, /* @__PURE__ */ import_react18.default.createElement(Card, { className: "w-full bg-transparent" }, /* @__PURE__ */ import_react18.default.createElement(CardHeader, { className: "px-2" }, /* @__PURE__ */ import_react18.default.createElement(CardTitle, null, "Suggested Prompts")), /* @__PURE__ */ import_react18.default.createElement(CardContent, { className: "p-2 pt-0" }, /* @__PURE__ */ import_react18.default.createElement("div", { className: "flex flex-col gap-2" }, prompts.map((prompt, i3) => /* @__PURE__ */ import_react18.default.createElement(
     "div",
     {
       key: i3,
@@ -173075,7 +173075,7 @@ var SuggestedPrompts = ({ onClick }) => {
       },
       /* @__PURE__ */ import_react18.default.createElement(CirclePlus, { className: "size-4" })
     )), /* @__PURE__ */ import_react18.default.createElement(TooltipContent2, null, "Add to Chat")))
-  ))))), chainType === "vault_qa" /* VAULT_QA_CHAIN */ && /* @__PURE__ */ import_react18.default.createElement("div", { className: "text-sm border border-border border-solid p-2 rounded-md" }, "Please note that this is a retrieval-based QA. Questions should contain keywords and concepts that exist literally in your vault"), chainType === "vault_qa" /* VAULT_QA_CHAIN */ && indexVaultToVectorStore === "NEVER(从不)" /* NEVER */ && /* @__PURE__ */ import_react18.default.createElement("div", { className: "text-sm border border-border border-solid p-2 rounded-md" }, /* @__PURE__ */ import_react18.default.createElement("div", null, /* @__PURE__ */ import_react18.default.createElement(TriangleAlert, { className: "size-4" }), " Your auto-index strategy is set to ", /* @__PURE__ */ import_react18.default.createElement("b", null, "NEVER"), ". Before proceeding, click the ", /* @__PURE__ */ import_react18.default.createElement("span", { className: "text-accent" }, "刷新索引"), " button below or run the", " ", /* @__PURE__ */ import_react18.default.createElement("span", { className: "text-accent" }, "Copilot command: Index (refresh) vault for QA"), " to update the index.")));
+  ))))), chainType === "vault_qa" /* VAULT_QA_CHAIN */ && /* @__PURE__ */ import_react18.default.createElement("div", { className: "text-sm border border-border border-solid p-2 rounded-md" }, "Please note that this is a retrieval-based QA. Questions should contain keywords and concepts that exist literally in your vault"), chainType === "vault_qa" /* VAULT_QA_CHAIN */ && indexVaultToVectorStore === "NEVER" /* NEVER */ && /* @__PURE__ */ import_react18.default.createElement("div", { className: "text-sm border border-border border-solid p-2 rounded-md" }, /* @__PURE__ */ import_react18.default.createElement("div", null, /* @__PURE__ */ import_react18.default.createElement(TriangleAlert, { className: "size-4" }), " Your auto-index strategy is set to ", /* @__PURE__ */ import_react18.default.createElement("b", null, "NEVER"), ". Before proceeding, click the ", /* @__PURE__ */ import_react18.default.createElement("span", { className: "text-accent" }, "Refresh Index"), " button below or run the", " ", /* @__PURE__ */ import_react18.default.createElement("span", { className: "text-accent" }, "Copilot command: Index (refresh) vault for QA"), " to update the index.")));
 };
 
 // src/components/chat-components/ChatMessages.tsx
@@ -173193,7 +173193,7 @@ var getAIResponse = async (userMessage, chainManager, addMessage, updateCurrentA
       options
     );
   } catch (error) {
-    console.error("模型请求失败:", error);
+    console.error("Model request failed:", error);
     let errorMessage = "Model request failed: ";
     if (error instanceof Error) {
       errorMessage += error.message;
@@ -173466,12 +173466,12 @@ var Chat4 = ({
   const handleSaveAsNote = (0, import_react21.useCallback)(
     async (openNote = false) => {
       if (!app2) {
-        console.error("应用程序实例不可用。");
+        console.error("App instance is not available.");
         return;
       }
       const visibleMessages = chatHistory.filter((message) => message.isVisible);
       if (visibleMessages.length === 0) {
-        new import_obsidian35.Notice("没有要保存的消息。");
+        new import_obsidian35.Notice("No messages to save.");
         return;
       }
       const firstMessageEpoch = visibleMessages[0].timestamp?.epoch || Date.now();
@@ -173502,10 +173502,10 @@ ${chatContent}`;
         const existingFile = app2.vault.getAbstractFileByPath(noteFileName);
         if (existingFile instanceof import_obsidian35.TFile) {
           await app2.vault.modify(existingFile, noteContentWithTimestamp);
-          new import_obsidian35.Notice(`聊天记录已在现有文档中更新:${noteFileName}`);
+          new import_obsidian35.Notice(`Chat updated in existing note: ${noteFileName}`);
         } else {
           await app2.vault.create(noteFileName, noteContentWithTimestamp);
-          new import_obsidian35.Notice(`聊天另存为新笔记: ${noteFileName}`);
+          new import_obsidian35.Notice(`Chat saved as new note: ${noteFileName}`);
         }
         if (openNote) {
           const file = app2.vault.getAbstractFileByPath(noteFileName);
@@ -173515,8 +173515,8 @@ ${chatContent}`;
           }
         }
       } catch (error) {
-        console.error("保存聊天为笔记时出错:", err2String(error));
-        new import_obsidian35.Notice("无法将聊天另存为文档，请查看控制台了解详细信息。");
+        console.error("Error saving chat as note:", err2String(error));
+        new import_obsidian35.Notice("Failed to save chat as note. Check console for details.");
       }
     },
     [
@@ -173544,7 +173544,7 @@ ${chatContent}`;
     async (messageIndex) => {
       const lastUserMessageIndex = messageIndex - 1;
       if (lastUserMessageIndex < 0 || chatHistory[lastUserMessageIndex].sender !== USER_SENDER) {
-        new import_obsidian35.Notice("无法重新生成第一条消息或用户消息。");
+        new import_obsidian35.Notice("Cannot regenerate the first message or a user message.");
         return;
       }
       const lastUserMessage = chatHistory[lastUserMessageIndex];
@@ -173569,11 +173569,11 @@ ${chatContent}`;
           { debug: settings.debug }
         );
         if (regeneratedResponse && settings.debug) {
-          console.log("消息已成功重新生成");
+          console.log("Message regenerated successfully");
         }
       } catch (error) {
-        console.error("重新生成消息时出错:", error);
-        new import_obsidian35.Notice("重新生成消息失败，请再试一次。");
+        console.error("Error regenerating message:", error);
+        new import_obsidian35.Notice("Failed to regenerate message. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -173767,7 +173767,7 @@ var CopilotView = class extends import_obsidian36.ItemView {
   }
   // Return a title for this view
   getTitle() {
-    return "Copilot 聊天";
+    return "Copilot Chat";
   }
   getDisplayText() {
     return "Copilot";
@@ -176578,7 +176578,7 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     SettingItem,
     {
       type: "password",
-      title: "许可证密钥",
+      title: "License Key",
       description: /* @__PURE__ */ import_react30.default.createElement("div", { className: "flex items-center gap-1.5" }, /* @__PURE__ */ import_react30.default.createElement("span", { className: "leading-none" }, "Copilot Plus brings powerful AI agent capabilities"), /* @__PURE__ */ import_react30.default.createElement(
         Popover2,
         {
@@ -176761,7 +176761,7 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     SettingItem,
     {
       type: "select",
-      title: "默认模式",
+      title: "Default Mode",
       description: /* @__PURE__ */ import_react30.default.createElement("div", { className: "flex items-center gap-1.5" }, /* @__PURE__ */ import_react30.default.createElement("span", { className: "leading-none" }, "Select the default chat mode"), /* @__PURE__ */ import_react30.default.createElement(
         Popover2,
         {
@@ -176830,7 +176830,7 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     {
       type: "text",
       title: "Default Conversation Folder Name",
-      description: "默认的文件夹名称,聊天对话将保存在此处。默认是 'copilot-conversations'",
+      description: "The default folder name where chat conversations will be saved. Default is 'copilot-conversations'",
       value: settings.defaultSaveFolder,
       onChange: (value) => updateSetting("defaultSaveFolder", value),
       placeholder: "copilot-conversations"
@@ -176840,7 +176840,7 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     {
       type: "text",
       title: "Custom Prompts Folder Name",
-      description: "自定义聊天提示词将保存的默认文件夹名称。默认是 'copilot-custom-prompts'",
+      description: "The default folder name where custom prompts will be saved. Default is 'copilot-custom-prompts'",
       value: settings.customPromptsFolder,
       onChange: (value) => updateSetting("customPromptsFolder", value),
       placeholder: "copilot-custom-prompts"
@@ -176850,7 +176850,7 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     {
       type: "text",
       title: "Default Conversation Tag",
-      description: "保存对话时使用的默认标签。默认是'ai-conversations'",
+      description: "The default tag to be used when saving a conversation. Default is 'ai-conversations'",
       value: settings.defaultConversationTag,
       onChange: (value) => updateSetting("defaultConversationTag", value),
       placeholder: "ai-conversations"
@@ -176920,7 +176920,7 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     {
       type: "switch",
       title: "Autosave Chat",
-      description: "在开始新聊天或插件重新加载时自动保存聊天",
+      description: "Automatically save the chat when starting a new one or when the plugin reloads",
       checked: settings.autosaveChat,
       onCheckedChange: (checked) => updateSetting("autosaveChat", checked)
     }
@@ -176928,8 +176928,8 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     SettingItem,
     {
       type: "switch",
-      title: "建议提示",
-      description: "在聊天视图中显示建议的提示词",
+      title: "Suggested Prompts",
+      description: "Show suggested prompts in the chat view",
       checked: settings.showSuggestedPrompts,
       onCheckedChange: (checked) => updateSetting("showSuggestedPrompts", checked)
     }
@@ -176937,8 +176937,8 @@ var BasicSettings = ({ indexVaultToVectorStore }) => {
     SettingItem,
     {
       type: "switch",
-      title: "相关笔记",
-      description: "在聊天视图中显示相关笔记",
+      title: "Relevant Notes",
+      description: "Show relevant notes in the chat view",
       checked: settings.showRelevantNotes,
       onCheckedChange: (checked) => updateSetting("showRelevantNotes", checked)
     }
@@ -179613,7 +179613,7 @@ var ModelAddDialog = ({
               Input,
               {
                 type: "text",
-                placeholder: "如果适用,请输入 OpenAI 组织 ID",
+                placeholder: "Enter OpenAI Organization ID if applicable",
                 value: model.openAIOrgId || "",
                 onChange: (e3) => setModel({ ...model, openAIOrgId: e3.target.value })
               }
@@ -179632,7 +179632,7 @@ var ModelAddDialog = ({
               Input,
               {
                 type: "text",
-                placeholder: "输入 Azure OpenAI API 实例名称",
+                placeholder: "Enter Azure OpenAI API Instance Name",
                 value: model.azureOpenAIApiInstanceName || "",
                 onChange: (e3) => {
                   setModel({ ...model, azureOpenAIApiInstanceName: e3.target.value });
@@ -179647,13 +179647,13 @@ var ModelAddDialog = ({
               required: true,
               error: errors2.deploymentName,
               errorMessage: "Deployment name is required",
-              description: "这是你的实际模型,无需单独传递模型名称。"
+              description: "This is your actual model, no need to pass a model name separately."
             },
             /* @__PURE__ */ import_react31.default.createElement(
               Input,
               {
                 type: "text",
-                placeholder: "输入 Azure OpenAI API 部署名称",
+                placeholder: "Enter Azure OpenAI API Deployment Name",
                 value: model.azureOpenAIApiDeploymentName || "",
                 onChange: (e3) => {
                   setModel({ ...model, azureOpenAIApiDeploymentName: e3.target.value });
@@ -179673,7 +179673,7 @@ var ModelAddDialog = ({
               Input,
               {
                 type: "text",
-                placeholder: "输入 Azure OpenAI API 嵌入部署名称",
+                placeholder: "Enter Azure OpenAI API Embedding Deployment Name",
                 value: model.azureOpenAIApiEmbeddingDeploymentName || "",
                 onChange: (e3) => {
                   setModel({ ...model, azureOpenAIApiEmbeddingDeploymentName: e3.target.value });
@@ -179693,7 +179693,7 @@ var ModelAddDialog = ({
               Input,
               {
                 type: "text",
-                placeholder: "输入 Azure OpenAI API 版本",
+                placeholder: "Enter Azure OpenAI API Version",
                 value: model.azureOpenAIApiVersion || "",
                 onChange: (e3) => {
                   setModel({ ...model, azureOpenAIApiVersion: e3.target.value });
@@ -179783,7 +179783,7 @@ var ModelAddDialog = ({
         checked: model.enableCors || false,
         onCheckedChange: (checked) => setModel({ ...model, enableCors: checked })
       }
-    ), /* @__PURE__ */ import_react31.default.createElement(Label4, { htmlFor: "enable-cors", className: "text-sm" }, "Enable CORS")), /* @__PURE__ */ import_react31.default.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ import_react31.default.createElement(Button, { variant: "outline", onClick: handleAdd, disabled: isButtonDisabled() }, "添加模型"), /* @__PURE__ */ import_react31.default.createElement(Button, { variant: "outline", onClick: handleVerify, disabled: isButtonDisabled() }, isVerifying ? /* @__PURE__ */ import_react31.default.createElement(import_react31.default.Fragment, null, /* @__PURE__ */ import_react31.default.createElement(LoaderCircle, { className: "mr-2 h-4 w-4 animate-spin" }), "Verify") : "Verify")))
+    ), /* @__PURE__ */ import_react31.default.createElement(Label4, { htmlFor: "enable-cors", className: "text-sm" }, "Enable CORS")), /* @__PURE__ */ import_react31.default.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ import_react31.default.createElement(Button, { variant: "outline", onClick: handleAdd, disabled: isButtonDisabled() }, "Add Model"), /* @__PURE__ */ import_react31.default.createElement(Button, { variant: "outline", onClick: handleVerify, disabled: isButtonDisabled() }, isVerifying ? /* @__PURE__ */ import_react31.default.createElement(import_react31.default.Fragment, null, /* @__PURE__ */ import_react31.default.createElement(LoaderCircle, { className: "mr-2 h-4 w-4 animate-spin" }), "Verify") : "Verify")))
   ));
 };
 
@@ -179922,7 +179922,7 @@ var ModelTable = ({
   title
 }) => {
   const isEmbeddingModel = models.length > 0 && models[0].isEmbeddingModel;
-  return /* @__PURE__ */ import_react32.default.createElement("div", { className: "mb-4" }, /* @__PURE__ */ import_react32.default.createElement("div", { className: "hidden md:block" }, /* @__PURE__ */ import_react32.default.createElement(Table, null, /* @__PURE__ */ import_react32.default.createElement(TableHeader, null, /* @__PURE__ */ import_react32.default.createElement(TableRow, null, /* @__PURE__ */ import_react32.default.createElement(TableHead, null, "模型"), /* @__PURE__ */ import_react32.default.createElement(TableHead, null, "提供商"), !isEmbeddingModel && /* @__PURE__ */ import_react32.default.createElement(TableHead, { className: "text-center" }, "Enable"), /* @__PURE__ */ import_react32.default.createElement(TableHead, { className: "text-center" }, "CORS"), /* @__PURE__ */ import_react32.default.createElement(TableHead, { className: "w-[100px] text-center" }, "Actions"))), /* @__PURE__ */ import_react32.default.createElement(TableBody, null, models.map((model) => /* @__PURE__ */ import_react32.default.createElement(
+  return /* @__PURE__ */ import_react32.default.createElement("div", { className: "mb-4" }, /* @__PURE__ */ import_react32.default.createElement("div", { className: "hidden md:block" }, /* @__PURE__ */ import_react32.default.createElement(Table, null, /* @__PURE__ */ import_react32.default.createElement(TableHeader, null, /* @__PURE__ */ import_react32.default.createElement(TableRow, null, /* @__PURE__ */ import_react32.default.createElement(TableHead, null, "Model"), /* @__PURE__ */ import_react32.default.createElement(TableHead, null, "Provider"), !isEmbeddingModel && /* @__PURE__ */ import_react32.default.createElement(TableHead, { className: "text-center" }, "Enable"), /* @__PURE__ */ import_react32.default.createElement(TableHead, { className: "text-center" }, "CORS"), /* @__PURE__ */ import_react32.default.createElement(TableHead, { className: "w-[100px] text-center" }, "Actions"))), /* @__PURE__ */ import_react32.default.createElement(TableBody, null, models.map((model) => /* @__PURE__ */ import_react32.default.createElement(
     TableRow,
     {
       key: getModelKeyFromModel(model),
@@ -180043,7 +180043,7 @@ var ModelSettings = () => {
     {
       type: "slider",
       title: "Temperature",
-      description: "默认是 0.1。更高值的温度参数将导致更多的创造性,但也可能带来更多错误。设置为 0 表示无随机性。",
+      description: "Default is 0.1. Higher values will result in more creativeness, but also more mistakes. Set to 0 for no randomness.",
       value: settings.temperature,
       onChange: (value) => updateSetting("temperature", value),
       min: 0,
@@ -180055,7 +180055,7 @@ var ModelSettings = () => {
     {
       type: "slider",
       title: "Token limit",
-      description: /* @__PURE__ */ import_react33.default.createElement(import_react33.default.Fragment, null, /* @__PURE__ */ import_react33.default.createElement("p", null, "最大输出", /* @__PURE__ */ import_react33.default.createElement("em", null, "Token数"), " 生成的数量。默认是 1000."), /* @__PURE__ */ import_react33.default.createElement("em", null, "此数字加上您聊天提示词的长度(输入Token)必须小于模型的上下文窗口。")),
+      description: /* @__PURE__ */ import_react33.default.createElement(import_react33.default.Fragment, null, /* @__PURE__ */ import_react33.default.createElement("p", null, "The maximum number of ", /* @__PURE__ */ import_react33.default.createElement("em", null, "output tokens"), " to generate. Default is 1000."), /* @__PURE__ */ import_react33.default.createElement("em", null, "This number plus the length of your prompt (input tokens) must be smaller than the context window of the model.")),
       value: settings.maxTokens,
       onChange: (value) => updateSetting("maxTokens", value),
       min: 0,
@@ -180067,7 +180067,7 @@ var ModelSettings = () => {
     {
       type: "slider",
       title: "Conversation turns in context",
-      description: "要包含在上下文中的先前对话轮数。默认是 15 轮,即 30 条消息。",
+      description: "The number of previous conversation turns to include in the context. Default is 15 turns, i.e. 30 messages.",
       value: settings.contextTurns,
       onChange: (value) => updateSetting("contextTurns", value),
       min: 1,
@@ -180108,7 +180108,7 @@ var AdvancedSettings = () => {
     {
       type: "textarea",
       title: "User System Prompt",
-      description: "自定义所有消息的聊天提示词，可能会导致意外行为！",
+      description: "Customize the system prompt for all messages, may result in unexpected behavior!",
       value: settings.userSystemPrompt,
       onChange: (value) => updateSetting("userSystemPrompt", value),
       placeholder: "Enter your system prompt here..."
@@ -180218,7 +180218,7 @@ var QASettings = ({ indexVaultToVectorStore }) => {
     {
       type: "slider",
       title: "Max Sources",
-      description: "Copilot会遍历您的知识库，查找相关块，并将前N个块传递给LLM。N的默认值为3。如果您希望在答案生成步骤中包含更多来源，请增加N的值。",
+      description: "Copilot goes through your vault to find relevant blocks and passes the top N blocks to the LLM. Default for N is 3. Increase if you want more sources included in the answer generation step.",
       min: 1,
       max: 128,
       step: 1,
@@ -180230,7 +180230,7 @@ var QASettings = ({ indexVaultToVectorStore }) => {
     {
       type: "slider",
       title: "Requests per second",
-      description: "默认值为10。若您的embedding提供商对速率进行了限制，请相应减少该值。",
+      description: "Default is 10. Decrease if you are rate limited by your embedding provider.",
       min: 1,
       max: 30,
       step: 1,
@@ -180242,7 +180242,7 @@ var QASettings = ({ indexVaultToVectorStore }) => {
     {
       type: "select",
       title: "Number of Partitions",
-      description: "Copilot索引的分区数。默认值为1。如果您在索引大型保管库时遇到问题，请增加。警告：更改需要清除并重建索引！",
+      description: "Number of partitions for Copilot index. Default is 1. Increase if you have issues indexing large vaults. Warning: Changes require clearing and rebuilding the index!",
       value: settings.numPartitions.toString(),
       onChange: handlePartitionsChange,
       options: [
@@ -180292,7 +180292,7 @@ var QASettings = ({ indexVaultToVectorStore }) => {
     {
       type: "switch",
       title: "Enable Obsidian Sync for Copilot index",
-      description: "如果启用，索引将存储在.obsidian文件夹中，并默认与obsidian Sync同步。如果禁用，它将存储在vault根目录下的.copilot索引文件夹中。",
+      description: "If enabled, the index will be stored in the .obsidian folder and synced with Obsidian Sync by default. If disabled, it will be stored in .copilot-index folder at vault root.",
       checked: settings.enableIndexSync,
       onCheckedChange: (checked) => updateSetting("enableIndexSync", checked)
     }
@@ -180301,7 +180301,7 @@ var QASettings = ({ indexVaultToVectorStore }) => {
     {
       type: "switch",
       title: "Disable index loading on mobile",
-      description: "启用后，Copilot 索引将不会在移动设备上加载以节省资源。仅提供聊天模式。来自桌面的现有索引将被保留。取消选中以启用移动端的问答模式。",
+      description: "When enabled, Copilot index won't be loaded on mobile devices to save resources. Only chat mode will be available. Any existing index from desktop sync will be preserved. Uncheck to enable QA modes on mobile.",
       checked: settings.disableIndexOnMobile,
       onCheckedChange: (checked) => updateSetting("disableIndexOnMobile", checked)
     }
@@ -180398,10 +180398,10 @@ var CopilotSettingTab = class extends import_obsidian42.PluginSettingTab {
       await app2.plugins.disablePlugin("copilot");
       await app2.plugins.enablePlugin("copilot");
       app2.setting.openTabById("copilot").display();
-      new import_obsidian42.Notice("插件已成功重新加载。");
+      new import_obsidian42.Notice("Plugin reloaded successfully.");
     } catch (error) {
-      new import_obsidian42.Notice("无法重新加载插件，请手动重新加载。");
-      console.error("重新加载插件时出错:", error);
+      new import_obsidian42.Notice("Failed to reload the plugin. Please reload manually.");
+      console.error("Error reloading plugin:", error);
     }
   }
   display() {
@@ -180644,7 +180644,7 @@ var CopilotPlugin = class extends import_obsidian43.Plugin {
   async loadCopilotChatHistory() {
     const chatFiles = await this.getChatHistoryFiles();
     if (chatFiles.length === 0) {
-      new import_obsidian43.Notice("未找到聊天记录。");
+      new import_obsidian43.Notice("No chat history found.");
       return;
     }
     new LoadChatHistoryModal(this.app, chatFiles, this.loadChatHistory.bind(this)).open();
