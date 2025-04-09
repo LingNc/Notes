@@ -1,0 +1,186 @@
+#!/bin/bash
+
+# 替换 ZeroTier Planet 文件的自动化脚本
+
+# 1. 检测是否以 root 身份运行
+if [ "$(id -u)" != "0" ]; then
+    echo "错误：必须使用 root 权限运行此脚本！"
+    echo "请尝试使用 'sudo $0'"
+    exit 1
+fi
+
+# 2. 检查并安装下载工具 (优先使用 curl)
+check_tools() {
+    if command -v wget &> /dev/null; then
+        DOWNLOAD_CMD="wget -q -O"
+    elif command -v curl &> /dev/null; then
+        DOWNLOAD_CMD="curl -s -o"
+    else
+        echo "未找到 wget 或 curl，正在尝试安装 curl..."
+        apt update -qq && apt install -y curl
+        if [ $? -ne 0 ]; then
+            echo "安装 curl 失败！请手动安装后重试。"
+            exit 1
+        fi
+        DOWNLOAD_CMD="curl -s -o"
+    fi
+}
+
+# 3. 获取用户选择：下载或使用本地文件
+get_source() {
+    echo "请选择 Planet 文件来源："
+    echo "1. 从网络下载"
+    echo "2. 使用本地文件"
+    read -p "请输入选项 [1/2]: " SOURCE_OPTION
+
+    case $SOURCE_OPTION in
+        1)
+            SOURCE_TYPE="download"
+            get_url
+            ;;
+        2)
+            SOURCE_TYPE="local"
+            get_local_file
+            ;;
+        *)
+            echo "错误：无效的选项！"
+            exit 1
+            ;;
+    esac
+}
+
+# 3a. 获取用户输入的下载链接
+get_url() {
+    read -p "请输入 Planet 文件的下载 URL: " DOWNLOAD_URL
+    if [ -z "$DOWNLOAD_URL" ]; then
+        echo "错误：下载链接不能为空！"
+        exit 1
+    fi
+
+    # 简单验证 URL 格式
+    if [[ ! $DOWNLOAD_URL =~ ^https?:// ]]; then
+        echo "错误：URL 必须以 http:// 或 https:// 开头"
+        exit 1
+    fi
+}
+
+# 3b. 获取本地文件路径
+get_local_file() {
+    read -p "请输入本地 Planet 文件的完整路径: " LOCAL_FILE
+    
+    if [ -z "$LOCAL_FILE" ]; then
+        echo "错误：文件路径不能为空！"
+        exit 1
+    fi
+    
+    if [ ! -f "$LOCAL_FILE" ]; then
+        echo "错误：文件 $LOCAL_FILE 不存在！"
+        exit 1
+    fi
+    
+    if [ ! -s "$LOCAL_FILE" ]; then
+        echo "错误：文件 $LOCAL_FILE 为空！"
+        exit 1
+    fi
+}
+
+# 4. 生成带日期戳的文件名 (精确到分钟)
+generate_filename() {
+    # 格式: 年-月-日-时-分
+    TIMESTAMP=$(date +%Y-%m-%d-%H-%M)
+    FILENAME="/tmp/zerotier-planet-${TIMESTAMP}"
+}
+
+# 5. 下载文件或复制本地文件
+prepare_file() {
+    generate_filename
+    
+    if [ "$SOURCE_TYPE" = "download" ]; then
+        echo "正在下载 Planet 文件到 ${FILENAME} ..."
+        $DOWNLOAD_CMD "$FILENAME" "$DOWNLOAD_URL"
+        
+        if [ ! -f "$FILENAME" ]; then
+            echo "错误：文件下载失败！请检查 URL 和网络连接。"
+            exit 1
+        fi
+        
+        # 检查文件是否非空
+        if [ ! -s "$FILENAME" ]; then
+            echo "错误：下载的文件为空！"
+            exit 1
+        fi
+    else
+        echo "正在复制本地文件到 ${FILENAME} ..."
+        cp "$LOCAL_FILE" "$FILENAME"
+        
+        if [ $? -ne 0 ]; then
+            echo "错误：无法复制文件！"
+            exit 1
+        fi
+    fi
+}
+
+# 6. 停止 ZeroTier 服务
+stop_zerotier() {
+    echo "正在停止 ZeroTier 服务..."
+    systemctl stop zerotier-one.service
+
+    # 等待服务完全停止
+    sleep 2
+    if systemctl is-active --quiet zerotier-one.service; then
+        echo "警告：无法停止 ZeroTier 服务，正在强制终止进程..."
+        pkill -9 zerotier-one
+        sleep 1
+    fi
+}
+
+# 7. 备份并替换 Planet 文件
+replace_file() {
+    ZT_HOME="/var/lib/zerotier-one"
+    BACKUP_FILE="${ZT_HOME}/planet.bak-${TIMESTAMP}"
+
+    # 检查ZeroTier目录是否存在
+    if [ ! -d "$ZT_HOME" ]; then
+        echo "错误：ZeroTier 目录 $ZT_HOME 不存在！"
+        exit 1
+    fi
+    
+    # 检查原始planet文件是否存在
+    if [ ! -f "${ZT_HOME}/planet" ]; then
+        echo "警告：原始 Planet 文件不存在，将直接创建新文件..."
+    else
+        echo "正在备份原 Planet 文件到 $BACKUP_FILE ..."
+        cp "${ZT_HOME}/planet" "$BACKUP_FILE"
+    fi
+
+    echo "正在替换 Planet 文件..."
+    mv -f "$FILENAME" "${ZT_HOME}/planet"
+    chown zerotier-one:zerotier-one "${ZT_HOME}/planet"
+}
+
+# 8. 重启服务
+restart_service() {
+    echo "正在启动 ZeroTier 服务..."
+    systemctl start zerotier-one.service
+
+    if systemctl is-active --quiet zerotier-one.service; then
+        echo "✅ 操作成功完成！"
+        echo "   - 新 Planet 文件: ${ZT_HOME}/planet"
+        echo "   - 备份文件: $BACKUP_FILE"
+    else
+        echo "警告：启动 ZeroTier 服务失败，请手动检查！"
+        exit 1
+    fi
+}
+
+# 主执行流程
+main() {
+    check_tools
+    get_source
+    prepare_file
+    stop_zerotier
+    replace_file
+    restart_service
+}
+
+main
