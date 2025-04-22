@@ -67,17 +67,17 @@ get_url() {
 # 3b. 获取本地文件路径
 get_local_file() {
     read -p "请输入本地 Planet 文件的完整路径: " LOCAL_FILE
-    
+
     if [ -z "$LOCAL_FILE" ]; then
         echo "错误：文件路径不能为空！"
         exit 1
     fi
-    
+
     if [ ! -f "$LOCAL_FILE" ]; then
         echo "错误：文件 $LOCAL_FILE 不存在！"
         exit 1
     fi
-    
+
     if [ ! -s "$LOCAL_FILE" ]; then
         echo "错误：文件 $LOCAL_FILE 为空！"
         exit 1
@@ -94,16 +94,16 @@ generate_filename() {
 # 5. 下载文件或复制本地文件
 prepare_file() {
     generate_filename
-    
+
     if [ "$SOURCE_TYPE" = "download" ]; then
         echo "正在下载 Planet 文件到 ${FILENAME} ..."
         $DOWNLOAD_CMD "$FILENAME" "$DOWNLOAD_URL"
-        
+
         if [ ! -f "$FILENAME" ]; then
             echo "错误：文件下载失败！请检查 URL 和网络连接。"
             exit 1
         fi
-        
+
         # 检查文件是否非空
         if [ ! -s "$FILENAME" ]; then
             echo "错误：下载的文件为空！"
@@ -112,7 +112,7 @@ prepare_file() {
     else
         echo "正在复制本地文件到 ${FILENAME} ..."
         cp "$LOCAL_FILE" "$FILENAME"
-        
+
         if [ $? -ne 0 ]; then
             echo "错误：无法复制文件！"
             exit 1
@@ -144,7 +144,7 @@ replace_file() {
         echo "错误：ZeroTier 目录 $ZT_HOME 不存在！"
         exit 1
     fi
-    
+
     # 检查原始planet文件是否存在
     if [ ! -f "${ZT_HOME}/planet" ]; then
         echo "警告：原始 Planet 文件不存在，将直接创建新文件..."
