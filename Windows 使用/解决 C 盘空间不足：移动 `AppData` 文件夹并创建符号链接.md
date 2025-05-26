@@ -1,14 +1,16 @@
 # 解决 C 盘空间不足：移动 `AppData` 文件夹并创建符号链接
 > 通过 `robocopy` 和 `mklink` 实现无损迁移
 
- 1. [问题](#问题)
- 2. [思考方案](#思考方案)
- 3. [方法实现](#方法实现)
-    1. [使用 `robocopy` 无损复制文件](#使用`robocopy`无损复制文件)
-    2. [使用 `mklink` 创建符号链接](#使用`mklink`创建符号链接)
-    3. [删除旧文件夹](#删除旧文件夹)
+- [解决 C 盘空间不足：移动 `AppData` 文件夹并创建符号链接](#解决-c-盘空间不足移动-appdata-文件夹并创建符号链接)
+  - [问题](#问题)
+  - [思考方案](#思考方案)
+  - [方法实现](#方法实现)
+    - [选择进行操作的环境](#选择进行操作的环境)
+    - [使用 `robocopy` 无损复制文件](#使用-robocopy-无损复制文件)
+    - [使用 `mklink` 创建符号链接](#使用-mklink-创建符号链接)
+    - [删除旧文件夹](#删除旧文件夹)
 
-> 2024-1-12  
+> 2025-1-12
 ---
 
 ## 问题
@@ -25,9 +27,16 @@
 > [!IMPORTANT]
 > 1. 在进行任何操作之前，建议备份重要数据，以防意外。
 > 2. 确保以管理员身份运行命令提示符，否则可能无法创建符号链接或复制文件。
-> 3. 某些应用程序可能依赖于 `AppData` 文件夹的原始路径，移动后可能导致部分功能异常。
+> 3. 某些应用程序可能依赖于 `AppData` 文件夹的原始路径，移动后可能导致部分功能异常。（目前未发现）
 ---
 ## 方法实现
+
+### 选择进行操作的环境
+要复制`AppData`要保证被复制的用户没有在使用，没有程序正在使用`AppData` 文件夹中的文件。
+环境编号：（后面使用`环境x`表示第几个环境）
+1. 使用 `Administrator` 用户登录 Windows 系统进行操作。
+2. 进入恢复选项的命令提示符操作。
+3. 使用`PE`微系统（如 Windows PE）进行操作。
 
 ### 使用 `robocopy` 无损复制文件
 
@@ -38,19 +47,33 @@
 
 2. **使用 `robocopy` 复制 `AppData` 文件夹**：
    - 假设将 `AppData` 从 `C:\Users\YourUserName\AppData` 复制到 `D:\AppData`，运行以下命令：
-     ```cmd
-     robocopy "C:\Users\YourUserName\AppData" "D:\AppData" /E /COPYALL /XJ
-     ```
-   > 参数说明：
-   >  - `/E`：复制所有子目录，包括空目录。
-   >  - `/COPYALL`：复制所有文件属性（包括权限、时间戳等）。
-   >  - `/XJ`：排除交接点（避免递归问题）。
+      ```cmd
+      robocopy "C:\Users\YourUserName\AppData" "D:\AppData" /E /COPYALL /XJ
+      ```
+      > 参数说明：
+      > - `/E`：复制所有子目录，包括空目录。
+      > - `/COPYALL`：复制所有文件属性（包括权限、时间戳等）。
+      > - `/XJ`：排除交接点（避免递归问题）。
+
+   - *在**环境2**恢复模式的`cmd`中，盘符并不是系统中的盘符，可能需要使用`diskpart`命令查看当前的盘符。
+     1. 输入 `diskpart` 进入磁盘分区工具。
+     2. 输入 `list volume` 查看所有分区的盘符。
+     3. 找到目标盘符（如 D 盘），然后使用 `exit` 退出 `diskpart`。
+     4. 注意修改命令，复制到正确的位置。
 
 3. **重命名原始文件夹**：
-   - 复制完成后，将原始 `AppData` 文件夹重命名，例如：
+   - ***环境2**，由于在命令行操作，重命名前需要去除`AppData`的隐藏属性
+     ```cmd
+     attrib -h -s "C:\Users\YourUserName\AppData"
+     ```
+      > 参数说明：
+      > - `-h`：去除隐藏属性。
+      > - `-s`：去除系统属性。
+   - ***环境2**将原始 `AppData` 文件夹重命名，（在命令行）使用 `ren` 或者 `rename` 命令：
      ```cmd
      ren "C:\Users\YourUserName\AppData" "AppData_Old"
      ```
+   - **非命令行**可选择在资源管理器重命名
 
 ### 使用 `mklink` 创建符号链接
 
@@ -61,8 +84,30 @@
      ```cmd
      mklink /J "C:\Users\YourUserName\AppData" "D:\AppData"
      ```
-   > 参数说明：
-   >  - `/J`：创建目录联接（Junction），适用于文件夹。
+    > 参数说明：
+    > - `/J`：创建目录联接（Junction），适用于文件夹。不能跨不同的磁盘系统（分区），可以跨同一个分区内的盘符。
+   - 应该也可以使用符号链接，注意不要使用相对路径
+       ```cmd
+       mklink /D "C:\Users\YourUserName\AppData" "D:\AppData"
+       ```
+      > 参数说明：
+      > - `/D`：创建符号链接（Symbolic Link），可以跨分区。
+   - ***环境2**
+      由于在命令提示符中并且这个盘符不正确，有两种方法
+      1. 直接链接盘符下的地址，需要记住目标的盘符
+         - 命令和上面一样
+      2. 使用 `volumeID`
+         - 首先获取所有盘符的卷标：
+            ```cmd
+            :: 获取所有卷标
+            mountvol
+            :: 获取指定卷标
+            vol D:
+            ```
+         - 然后使用卷标创建链接：
+           ```cmd
+           mklink /D "C:\Users\YourUserName\AppData" "\\?\Volume{卷标}\AppData"
+           ```
 
 2. **验证符号链接**：
    - 打开 `C:\Users\YourUserName\AppData`，确认它指向 `D:\AppData` 的内容。
@@ -79,6 +124,6 @@
 
 ---
 > 参考：
-> [如何在 Windows 10 上移动 AppData 文件夹](https://cn.windows-office.net/?p=31595)  
-> [电脑上AppData数据迁移（解决C盘空间不足的问题）](https://cloud.tencent.com/developer/article/2245362)  
-> [在Windows中创建软链接和硬链接（mklink 命令使用教程）](https://lykqq.com/tutorial/533.html)  
+> [如何在 Windows 10 上移动 AppData 文件夹](https://cn.windows-office.net/?p=31595)
+> [电脑上AppData数据迁移（解决C盘空间不足的问题）](https://cloud.tencent.com/developer/article/2245362)
+> [在Windows中创建软链接和硬链接（mklink 命令使用教程）](https://lykqq.com/tutorial/533.html)
