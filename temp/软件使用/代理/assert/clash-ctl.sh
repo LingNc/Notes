@@ -4,6 +4,9 @@
 CONFIG_DIR="$HOME/.config/clash"
 CONFIG_FILE="$CONFIG_DIR/.clash-ctl.conf"
 
+# 系统安装路径
+SYSTEM_BIN_PATH="/usr/local/bin/clash-ctl"
+
 # 脚本自身路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
@@ -27,6 +30,67 @@ init_config() {
     source "$CONFIG_FILE"
 }
 
+# 安装依赖
+install_deps() {
+    local pkg_manager=""
+    local install_cmd=""
+
+    # 检测包管理器
+    if command -v apt-get &> /dev/null; then
+        pkg_manager="apt-get"
+        install_cmd="sudo apt-get install -y"
+    elif command -v yum &> /dev/null; then
+        pkg_manager="yum"
+        install_cmd="sudo yum install -y"
+    elif command -v dnf &> /dev/null; then
+        pkg_manager="dnf"
+        install_cmd="sudo dnf install -y"
+    elif command -v zypper &> /dev/null; then
+        pkg_manager="zypper"
+        install_cmd="sudo zypper install -y"
+    elif command -v pacman &> /dev/null; then
+        pkg_manager="pacman"
+        install_cmd="sudo pacman -Sy --noconfirm"
+    else
+        echo "错误：无法识别的包管理器！请手动安装依赖：curl jq"
+        exit 1
+    fi
+
+    echo "检测到包管理器: $pkg_manager"
+    echo "正在安装依赖: curl jq"
+
+    if ! $install_cmd curl jq; then
+        echo "依赖安装失败！请手动运行: $install_cmd curl jq"
+        exit 1
+    fi
+
+    echo "依赖安装完成"
+}
+
+# 检查依赖
+check_deps() {
+    local missing=()
+
+    if ! command -v curl &> /dev/null; then
+        missing+=("curl")
+    fi
+
+    if ! command -v jq &> /dev/null; then
+        missing+=("jq")
+    fi
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo "缺少依赖: ${missing[*]}"
+        read -p "是否自动安装依赖？[Y/n] " confirm
+        if [[ ! $confirm =~ ^[Nn] ]]; then
+            install_deps
+        else
+            echo "请手动安装依赖后重试"
+            exit 1
+        fi
+    fi
+}
+
 # 安装脚本到系统路径
 install_script() {
     if [ "$(id -u)" -ne 0 ]; then
@@ -34,18 +98,56 @@ install_script() {
         exit 1
     fi
 
-    local target_path="/usr/local/bin/clash-ctl"
+    # 检查并安装依赖
+    check_deps
 
-    if [ -f "$target_path" ]; then
+    if [ -f "$SYSTEM_BIN_PATH" ]; then
         echo "检测到已安装的版本，正在更新..."
-        rm -f "$target_path"
+        rm -f "$SYSTEM_BIN_PATH"
     fi
 
-    ln -s "$SCRIPT_PATH" "$target_path"
+    ln -s "$SCRIPT_PATH" "$SYSTEM_BIN_PATH"
     chmod +x "$SCRIPT_PATH"
 
-    echo "已安装到系统路径: $target_path"
+    echo "已安装到系统路径: $SYSTEM_BIN_PATH"
     echo "现在可以在任意位置使用 'clash-ctl' 命令"
+}
+
+# 卸载脚本
+uninstall_script() {
+    if [ "$(id -u)" -ne 0 ]; then
+        echo "卸载需要root权限，请使用sudo运行"
+        exit 1
+    fi
+
+    # 移除系统链接
+    if [ -f "$SYSTEM_BIN_PATH" ] || [ -L "$SYSTEM_BIN_PATH" ]; then
+        rm -f "$SYSTEM_BIN_PATH"
+        echo "已移除系统链接: $SYSTEM_BIN_PATH"
+    else
+        echo "未找到系统安装的clash-ctl"
+    fi
+
+    # 删除配置文件
+    if [ -f "$CONFIG_FILE" ]; then
+        read -p "是否要删除配置文件 $CONFIG_FILE？[y/N] " confirm
+        if [[ $confirm =~ ^[Yy] ]]; then
+            rm -f "$CONFIG_FILE"
+            echo "已删除配置文件: $CONFIG_FILE"
+
+            # 如果配置目录为空，也删除目录
+            if [ -d "$CONFIG_DIR" ] && [ -z "$(ls -A "$CONFIG_DIR")" ]; then
+                rmdir "$CONFIG_DIR"
+                echo "已删除空配置目录: $CONFIG_DIR"
+            fi
+        else
+            echo "保留配置文件: $CONFIG_FILE"
+        fi
+    else
+        echo "未找到配置文件: $CONFIG_FILE"
+    fi
+
+    echo "卸载完成"
 }
 
 # 设置控制器地址
@@ -104,25 +206,15 @@ switch_node() {
     fi
 }
 
-# 检查依赖
-check_deps() {
-    if ! command -v curl &> /dev/null; then
-        echo "错误：请先安装 curl"
-        exit 1
-    fi
-    if ! command -v jq &> /dev/null; then
-        echo "错误：请先安装 jq (JSON解析工具)"
-        exit 1
-    fi
-}
-
 # 显示帮助
 show_help() {
-    echo "Clash 代理控制器 (v1.2)"
+    echo "Clash 代理控制器 (v1.4)"
     echo "配置文件: $CONFIG_FILE"
+    echo "系统路径: $SYSTEM_BIN_PATH"
     echo ""
     echo "用法:"
     echo "  sudo clash-ctl install         安装脚本到系统路径"
+    echo "  sudo clash-ctl uninstall       卸载脚本并删除配置文件"
     echo "  clash-ctl set <控制器地址>     设置控制器地址"
     echo "  clash-ctl groups              列出所有代理组"
     echo "  clash-ctl nodes <组名>        列出组内节点"
@@ -131,11 +223,12 @@ show_help() {
 }
 
 # 主流程
-check_deps
-
 case $1 in
     install)
         install_script
+        ;;
+    uninstall)
+        uninstall_script
         ;;
     set)
         init_config
@@ -147,10 +240,12 @@ case $1 in
         ;;
     groups)
         init_config
+        check_deps
         show_groups
         ;;
     nodes)
         init_config
+        check_deps
         if [ -z "$2" ]; then
             echo "错误：请提供代理组名称"
             exit 1
@@ -159,6 +254,7 @@ case $1 in
         ;;
     switch)
         init_config
+        check_deps
         if [ -z "$2" ] || [ -z "$3" ]; then
             echo "错误：请提供代理组和节点名称"
             exit 1
