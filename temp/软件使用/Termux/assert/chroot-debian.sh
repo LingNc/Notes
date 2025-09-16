@@ -19,8 +19,8 @@ USERNAME="user"
 # 函数：执行挂载操作
 mount_filesystems() {
     echo ">>> 步骤 1/4: 准备挂载模式..."
-    mount -o rw,remount,dev,suid /data
-    echo "    [/data] 已重新挂载为读写模式，并启用 suid。"
+    mount -o remount,dev,suid /data
+    echo "    [/data] 已重新挂载，并启用 suid。"
 
     echo ">>> 步骤 2/4: 挂载所有必要的 API 和目录..."
     # 挂载驱动器
@@ -35,17 +35,28 @@ mount_filesystems() {
         mkdir -p "${DEBIANPATH}/dev/shm"
     fi
     mount -t tmpfs -o size=1G tmpfs "${DEBIANPATH}/dev/shm"
+    # 只读挂载 /system 使用一些原生的安卓指令
+    # if [ ! -d "${DEBIANPATH}/system" ]; then
+    #     mkdir -p "${DEBIANPATH}/system"
+    # fi
+    # mount -o bind,ro /system "${DEBIANPATH}/system"
+    # if [ ! -d "${DEBIANPATH}/apex" ]; then
+    #     mkdir -p "${DEBIANPATH}/apex"
+    # fi
+    # mount -o bind,ro /apex "${DEBIANPATH}/apex"
     echo "    API 文件系统已挂载。"
 }
 
 # 函数：执行卸载操作
 umount_filesystems() {
     echo ">>> 步骤 4/4: 退出 Chroot，正在清理挂载点..."
-    umount "${DEBIANPATH}/dev/shm" 2>/dev/null
-    umount "${DEBIANPATH}/dev/pts" 2>/dev/null
-    umount "${DEBIANPATH}/sys" 2>/dev/null
-    umount "${DEBIANPATH}/proc" 2>/dev/null
-    umount "${DEBIANPATH}/dev" 2>/dev/null
+    # 依次卸载所有挂载的文件系统
+    # umount "${DEBIANPATH}/system"
+    umount "${DEBIANPATH}/dev/shm"
+    umount "${DEBIANPATH}/dev/pts"
+    umount "${DEBIANPATH}/sys"
+    umount "${DEBIANPATH}/proc"
+    umount "${DEBIANPATH}/dev"
     # 检测清理是否干净
     mount | grep "$DEBIANPATH"
     if [ $? -eq 0 ]; then
