@@ -31,18 +31,17 @@ mount_filesystems() {
     mount -t sysfs sysfs "${DEBIANPATH}/sys"
     # 创建一个共享内存空间指定大小，有很多程序要使用，如Electron APPS需要/dev/shm
     # 确保目录存在
-    if [ ! -d "${DEBIANPATH}/dev/shm" ]; then
-        mkdir -p "${DEBIANPATH}/dev/shm"
-    fi
+    mkdir -p "${DEBIANPATH}/dev/shm"
     mount -t tmpfs -o size=1G tmpfs "${DEBIANPATH}/dev/shm"
+    # 挂载Termux的tmp目录
+    mkdir -p "${DEBIANPATH}/tmp"
+    mount --bind /data/data/com.termux/files/usr/tmp "${DEBIANPATH}/tmp"
+    # 确保tmp目录权限正确
+    chmod 1777 "${DEBIANPATH}/tmp"
     # 只读挂载 /system 使用一些原生的安卓指令
-    # if [ ! -d "${DEBIANPATH}/system" ]; then
-    #     mkdir -p "${DEBIANPATH}/system"
-    # fi
+    # mkdir -p "${DEBIANPATH}/system"
     # mount -o bind,ro /system "${DEBIANPATH}/system"
-    # if [ ! -d "${DEBIANPATH}/apex" ]; then
-    #     mkdir -p "${DEBIANPATH}/apex"
-    # fi
+    # mkdir -p "${DEBIANPATH}/apex"
     # mount -o bind,ro /apex "${DEBIANPATH}/apex"
     echo "    API 文件系统已挂载。"
 }
@@ -51,7 +50,9 @@ mount_filesystems() {
 umount_filesystems() {
     echo ">>> 步骤 4/4: 退出 Chroot，正在清理挂载点..."
     # 依次卸载所有挂载的文件系统
+    # umount "${DEBIANPATH}/apex"
     # umount "${DEBIANPATH}/system"
+    umount "${DEBIANPATH}/tmp"
     umount "${DEBIANPATH}/dev/shm"
     umount "${DEBIANPATH}/dev/pts"
     umount "${DEBIANPATH}/sys"
