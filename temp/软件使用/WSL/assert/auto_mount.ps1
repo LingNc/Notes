@@ -1,0 +1,1 @@
+wsl --mount --vhd "H:\path\to\your.vhdx" --name <Name>
