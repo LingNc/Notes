@@ -20,7 +20,7 @@ CONFIRM_TIMEOUT=15
 
 # --------- 主程序逻辑 --------- #
 
-echo ">>> 正在启动 Chroot Debian X11 环境..."
+echo ">>> 正在启动 Chroot Debian Wayland 环境..."
 # 1. 必要性检查
 if [ ! -d "$DEBIANPATH" ]; then
     echo "[错误] Debian 根目录不存在: $DEBIANPATH"
@@ -108,17 +108,13 @@ chroot_func(){
         QT_QPA_PLATFORM="wayland" \
         GDK_BACKEND="wayland" \
         chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
-        # --- Wayland-on-X 启动逻辑 ---
+            # 使用 dbus-run-session 启动一个完整的 Plasma Wayland 会话
 
-        # 1. 在后台启动 Plasma Shell (任务栏、桌面图标等)
-        #    它会等待 kwin_wayland 合成器启动后再显示
-        plasmashell &
-
-        # 2. 在前台启动 D-Bus 会话和 KWin Wayland 合成器。
-        #    kwin_wayland 会作为一个窗口显示在 Termux:X11 上。
-        #    这个命令会一直运行(阻塞)，直到您从 KDE 内部注销。
-        dbus-launch --exit-with-session kwin_wayland --x11-display :1 --xwayland
-    "
+            #    - dbus-run-session: 启动一个干净的 D-Bus 会话，并确保所有子进程都能访问它
+            #    - startplasma-wayland: 这是启动 Plasma Wayland 的官方、标准脚本
+            #    - exec: 确保会话结束后，su 进程也随之退出，以便外部脚本继续执行清理操作
+            exec dbus-run-session -- startplasma-wayland --x11-display :1 --xwayland
+        "
 
     # 6. 退出后清理挂载点
 
