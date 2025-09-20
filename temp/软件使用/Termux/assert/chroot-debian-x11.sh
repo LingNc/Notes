@@ -4,6 +4,9 @@
 #                          Chroot 环境启动脚本                       #
 # ================================================================= #
 
+# 配置环境变量，在root情况下可以正常使用termux命令
+export PATH="/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr/bin/applets:/system/bin:/system/xbin:/sbin:/sbin/bin:$PATH"
+
 # --- 请在这里配置您的变量 ---
 
 # 1. Chroot 根目录的完整路径
@@ -23,22 +26,20 @@ if [ ! -d "$DEBIANPATH" ]; then
     exit 1
 fi
 
-if [ "$(id -u)" != "0" ]; then
-    echo "[错误] 此脚本需要 root 权限才能运行。请使用 'su -c ./start-debian.sh' 来执行。"
-    exit 1
-fi
 echo ">>> 步骤 1/5: 必要性检查成功。"
 
 # 2. 清理旧termux进程
 echo ">>> 步骤 2/5: 清理旧的 Termux 进程..."
 # 因为这个termux x11在进程中是app_process运行的，没办法直接指定termux-x11或者使用一些方法筛选和捕获这个pid也是可以的
-pkill -9 app_process pulseaudio
+killall -9 app_process pulseaudio
 
 # 3. 启动Termux侧进程
 echo ">>> 步骤 3/5: 启动 Termux 侧必要进程..."
 echo "    - 启动 X11 服务..."
+# 启动termux-x11
+am start --user 0 -n com.termux.x11/com.termux.x11.MainActivity
 termux-x11 :1 -ac &
-TERMUX_X11_PID=$!
+sleep 3 # 等待X服务器启动
 echo "    - 启动 pulseaudio 音频服务..."
 pulseaudio --start --exit-idle-time=-1
 pacmd load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
@@ -77,17 +78,27 @@ echo "    - 退出即可自动清理环境。"
 echo ""
 
 # 使用 env -i 以干净的环境变量进入 chroot
+# 设置终端类型为支持256色的xterm
+# 设置PATH环境变量，包含常用的系统路径
+# 设置临时目录
+# 设置显示变量
+# 设置PulseAudio服务器地址
+# 设置MESA加载器驱动覆盖为kgsl
+# vulkan驱动需要
+# 设置XDG运行时目录
+# 设置XDG会话类型为x11
+# 设置Qt平台插件为xcb
 env -i \
-    TERM="xterm-256color" \  # 设置终端类型为支持256色的xterm
-    PATH="/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games" \  # 设置PATH环境变量，包含常用的系统路径
-    TMPDIR="/tmp" \  # 设置临时目录
-    DISPLAY=":1" \  # 设置显示变量
-    PULSE_SERVER="tcp:127.0.0.1:4713" \  # 设置PulseAudio服务器地址
-    MESA_LOADER_DRIVER_OVERRIDE="kgsl" \  # 设置MESA加载器驱动覆盖为kgsl
-    TU_DEBUG="noconform" \  # vulkan驱动需要
-    XDG_RUNTIME_DIR="/run/user/$(id -u)" \  # 设置XDG运行时目录
-    XDG_SESSION_TYPE="x11" \  # 设置XDG会话类型为x11
-    QT_QPA_PLATFORM="xcb" \  # 设置Qt平台插件为xcb
+    TERM="xterm-256color" \
+    PATH="/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games" \
+    TMPDIR="/tmp" \
+    DISPLAY=":1" \
+    PULSE_SERVER="tcp:127.0.0.1:4713" \
+    MESA_LOADER_DRIVER_OVERRIDE="kgsl" \
+    TU_DEBUG="noconform" \
+    XDG_RUNTIME_DIR="/run/user/$(id -u)" \
+    XDG_SESSION_TYPE="x11" \
+    QT_QPA_PLATFORM="xcb" \
     chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
     # --- 进入chroot后的命令 ---
 
@@ -116,7 +127,7 @@ if [ -z "$PIDS" ]; then
     echo "    - 未发现 Chroot 内有正在运行的进程。"
 else
     echo "    - 正在发送 TERM 信号 (15)，请求以下进程优雅退出："
-    echo "${PIDS}"
+    echo "$(echo "${PIDS}" | tr '\n' ',')"
     echo "${PIDS}" | xargs -r kill -TERM
 
     echo "    - 等待 ${GRACE_PERIOD} 秒，让进程自行清理..."
@@ -157,16 +168,8 @@ else
     fi
 fi
 
-# 2. 终止Termux的服务进程
-echo ">>> 步骤 2/4: 终止 Termux 侧服务进程..."
-echo "    - 正在终止 Termux X11 服务 (PID: $TERMUX_X11_PID)..."
-#
-kill -TERM $TERMUX_X11_PID
-echo "    - 正在终止 pulseaudio 服务..."
-pkill -TERM pulseaudio
-
-# 3. 卸载文件系统
-echo ">>> 步骤 3/4: 清理挂载点..."
+# 2. 卸载文件系统
+echo ">>> 步骤 2/4: 清理挂载点..."
 # 依次卸载所有挂载的文件系统
 # umount "${DEBIANPATH}/apex"
 # umount "${DEBIANPATH}/system"
@@ -177,11 +180,18 @@ umount "${DEBIANPATH}/sys"
 umount "${DEBIANPATH}/proc"
 umount "${DEBIANPATH}/dev"
 
-# 4. 检查卸载状态
-echo ">>> 步骤 4/4: 检查挂载点状态..."
+# 3. 检查卸载状态
+echo ">>> 步骤 3/4: 检查挂载点状态..."
 if mount | grep -q "$DEBIANPATH"; then
     echo ""
     echo "[警告] 仍有挂载点卸载失败！"
 else
     echo "    - 所有挂载点已成功清理。"
 fi
+
+# 4. 终止Termux的服务进程
+echo ">>> 步骤 4/4: 终止 Termux 侧服务进程..."
+echo "    - 正在终止 Termux X11 服务..."
+pkill -TERM app_process
+echo "    - 正在终止 pulseaudio 服务..."
+pkill -TERM pulseaudio
