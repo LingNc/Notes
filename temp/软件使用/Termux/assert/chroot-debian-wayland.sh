@@ -51,6 +51,7 @@ chroot_func(){
         echo "[错误] 此函数必须以 root 权限运行。请使用 'su -c $0'。"
         exit 1
     fi
+
     # 4. 挂载必要的文件系统
     echo ">>> 步骤 4/5: 准备挂载模式..."
     mount -o remount,dev,suid /data
@@ -103,15 +104,20 @@ chroot_func(){
         PULSE_SERVER="tcp:127.0.0.1" \
         MESA_LOADER_DRIVER_OVERRIDE="kgsl" \
         TU_DEBUG="noconform" \
-        XDG_SESSION_TYPE="x11" \
-        QT_QPA_PLATFORM="xcb" \
+        XDG_SESSION_TYPE="wayland" \
+        QT_QPA_PLATFORM="wayland" \
+        GDK_BACKEND="wayland" \
         chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
-        # --- 进入chroot后的命令 ---
+        # --- Wayland-on-X 启动逻辑 ---
 
-        # 用 dbus-launch 启动整个 Xsession。
-        # KDE 会话启动后，会自动根据配置(autostart)拉起 fcitx5。
-        # fcitx5 会自动连接到这个由 dbus-launch 创建的会话总线上。
-        dbus-launch --exit-with-session /etc/X11/Xsession
+        # 1. 在后台启动 Plasma Shell (任务栏、桌面图标等)
+        #    它会等待 kwin_wayland 合成器启动后再显示
+        plasmashell &
+
+        # 2. 在前台启动 D-Bus 会话和 KWin Wayland 合成器。
+        #    kwin_wayland 会作为一个窗口显示在 Termux:X11 上。
+        #    这个命令会一直运行(阻塞)，直到您从 KDE 内部注销。
+        dbus-launch --exit-with-session kwin_wayland --x11-display :1 --xwayland
     "
 
     # 6. 退出后清理挂载点
@@ -149,7 +155,7 @@ chroot_func(){
             echo "    - 以下顽固进程未能在优雅退出期间终止："
 
             # 使用 ps 命令显示进程的 PID 和名称，更直观
-            ps -o pid,comm -p $(echo ${STUBBORN_PIDS} | tr '\n' ' ') | sed
+            ps -o pid,comm -p $(echo ${STUBBORN_PIDS} | tr '\n' ' ')
 
             echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             echo ""
