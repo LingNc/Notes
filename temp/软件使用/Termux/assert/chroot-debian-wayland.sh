@@ -52,6 +52,23 @@ chroot_func(){
         exit 1
     fi
 
+    # 4. 修正 X11 Socket 权限
+    echo ">>> 步骤 4/6: 修正 X11 Socket 权限 (根据UP主建议)..."
+    X11_SOCK_DIR="/data/data/com.termux/files/usr/tmp/.X11-unix"
+
+    # 获取 chroot 内部用户的 UID 和 GID
+    CHROOT_UID=$(chroot "$DEBIANPATH" id -u "$USERNAME")
+    CHROOT_GID=$(chroot "$DEBIANPATH" id -g "$USERNAME")
+
+    if [ -n "$CHROOT_UID" ] && [ -n "$CHROOT_GID" ]; then
+        echo "    - chroot 内用户 ${USERNAME} 的 UID/GID 为 ${CHROOT_UID}/${CHROOT_GID}"
+        echo "    - 正在更改 ${X11_SOCK_DIR} 属主..."
+        chown "${CHROOT_UID}:${CHROOT_GID}" "$X11_SOCK_DIR"
+        echo "    - 权限修正成功。"
+    else
+        echo "[警告] 无法获取 chroot 内用户 ${USERNAME} 的 UID/GID，跳过权限修正。"
+    fi
+
     # 4. 挂载必要的文件系统
     echo ">>> 步骤 4/5: 准备挂载模式..."
     mount -o remount,dev,suid /data
@@ -108,12 +125,18 @@ chroot_func(){
         QT_QPA_PLATFORM="wayland" \
         GDK_BACKEND="wayland" \
         chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
-            # 使用 dbus-run-session 启动一个完整的 Plasma Wayland 会话
-
-            #    - dbus-run-session: 启动一个干净的 D-Bus 会话，并确保所有子进程都能访问它
-            #    - startplasma-wayland: 这是启动 Plasma Wayland 的官方、标准脚本
-            #    - exec: 确保会话结束后，su 进程也随之退出，以便外部脚本继续执行清理操作
-            exec dbus-run-session -- startplasma-wayland --x11-display :1 --xwayland
+            # 正确设置 XDG_RUNTIME_DIR
+            export XDG_RUNTIME_DIR=\"/run/user/\$(id -u)\"
+            exec dbus-run-session -- bash -c '
+                # 在后台启动 KDE 守护进程，这是关键
+                /usr/bin/kded6 &
+                # 在后台启动 KWin Wayland 合成器，这次重新启用 --xwayland
+                /usr/bin/kwin_wayland --x11-display :${DISPLAY_NUM} --xwayland &
+                # 等待 kwin 启动
+                sleep 2
+                # 在前台启动 Plasma Shell
+                /usr/bin/plasmashell
+            '
         "
 
     # 6. 退出后清理挂载点
