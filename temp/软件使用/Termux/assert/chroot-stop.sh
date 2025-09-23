@@ -10,9 +10,9 @@ export PATH="/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr
 # --- 请在这里配置您的变量 ---
 
 # 1. Chroot 根目录的完整路径
-DEBIANPATH="/data/data/com.termux/files/home/debian-rootfs"
+DEBIANPATH="/data/data/com.termux/files/home/debian-prootfs"
 # 2. 您想默认登录的普通用户名
-USERNAME="user"
+USERNAME="lingnc"
 # 3. 终止程序的等待时间（秒）
 GRACE_PERIOD=3
 # 4. 强制终止前的确认等待时间（秒）

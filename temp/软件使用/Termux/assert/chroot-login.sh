@@ -6,13 +6,15 @@
 #       本脚本使用 'env -i' 来确保一个完全干净的环境变量。             #
 # ================================================================= #
 
+export PATH="/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr/bin/applets:/system/bin:/system/xbin:/sbin:/sbin/bin:$PATH"
+
 # --- 请在这里配置您的变量 ---
 
 # 1. Chroot 根目录的完整路径
-DEBIANPATH="/data/data/com.termux/files/home/debian-rootfs"
+DEBIANPATH="/data/data/com.termux/files/home/debian-prootfs"
 
 # 2. 您想默认登录的普通用户名
-USERNAME="user"
+USERNAME="lingnc"
 
 # --------------------------- 脚本主体 ---------------------------- #
 
@@ -27,7 +29,8 @@ mount_filesystems() {
     mount --bind /dev "${DEBIANPATH}/dev"
     # 挂载其他必要的文件系统
     mount -t devpts devpts "${DEBIANPATH}/dev/pts"
-    mount -t proc proc "${DEBIANPATH}/proc"
+    #mount -t proc proc "${DEBIANPATH}/proc"
+    mount -t proc  proc "${DEBIANPATH}/proc"
     mount -t sysfs sysfs "${DEBIANPATH}/sys"
     # 创建一个共享内存空间指定大小，有很多程序要使用，如Electron APPS需要/dev/shm
     # 确保目录存在
@@ -87,7 +90,29 @@ echo "    - 登录用户: ${USERNAME}"
 echo "    - 输入 'exit' 命令即可退出并自动清理环境。"
 echo ""
 
-env -i TERM="xterm-256color" chroot $DEBIANPATH /bin/su - "${USERNAME}" --login
+# 1. 清空当前参数列表
+set --
+
+# 2. 像搭积木一样，一步步添加 unshare 和 chroot 的参数
+#set -- "$@" --mount
+#set -- "$@" -R "$DEBIANPATH"
+#set -- "$@" -m --propagation=private
+
+# 3. 添加 env -i 和所有需要的环境变量
+# 使用 env -i 以干净的环境变量进入 chroot
+set -- "$@" env -i
+# 设置终端类型为支持256色的xterm
+set -- "$@" TERM="xterm-256color"
+# 设置PATH环境变量，包含常用的系统路径
+#set -- "$@" PATH=$PATH
+# 设置临时目录
+#set -- "$@" TMPDIR="/tmp"
+
+set -- "$@" chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login
+
+# echo "${@}"
+# 5. 最终执行构建好的完整命令
+ "${@}"
 
 # 退出后清理挂载点
 umount_filesystems

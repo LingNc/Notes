@@ -52,22 +52,8 @@ chroot_func(){
         exit 1
     fi
 
-    # 4. 修正 X11 Socket 权限
-    echo ">>> 步骤 4/6: 修正 X11 Socket 权限 (根据UP主建议)..."
-    X11_SOCK_DIR="/data/data/com.termux/files/usr/tmp/.X11-unix"
-
     # 获取 chroot 内部用户的 UID 和 GID
-    CHROOT_UID=$(chroot "$DEBIANPATH" id -u "$USERNAME")
-    CHROOT_GID=$(chroot "$DEBIANPATH" id -g "$USERNAME")
-
-    if [ -n "$CHROOT_UID" ] && [ -n "$CHROOT_GID" ]; then
-        echo "    - chroot 内用户 ${USERNAME} 的 UID/GID 为 ${CHROOT_UID}/${CHROOT_GID}"
-        echo "    - 正在更改 ${X11_SOCK_DIR} 属主..."
-        chown "${CHROOT_UID}:${CHROOT_GID}" "$X11_SOCK_DIR"
-        echo "    - 权限修正成功。"
-    else
-        echo "[警告] 无法获取 chroot 内用户 ${USERNAME} 的 UID/GID，跳过权限修正。"
-    fi
+    CHROOT_UID=$(chroot "$DEBIANPATH" /usr/bin/id -u "$USERNAME")
 
     # 4. 挂载必要的文件系统
     echo ">>> 步骤 4/5: 准备挂载模式..."
@@ -104,40 +90,60 @@ chroot_func(){
 
     # 使用 env -i 以干净的环境变量进入 chroot
     # 设置终端类型为支持256色的xterm
-    # 设置PATH环境变量，包含常用的系统路径
-    # 设置临时目录
-    # 设置显示变量
-    # 设置PulseAudio服务器地址
-    # 设置MESA加载器驱动覆盖为kgsl
-    # vulkan驱动需要
-    # 设置XDG运行时目录
-    # 设置XDG会话类型为x11
-    # 设置Qt平台插件为xcb
-    env -i \
-        TERM="xterm-256color" \
-        PATH="/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games" \
-        TMPDIR="/tmp" \
-        DISPLAY=":1" \
-        PULSE_SERVER="tcp:127.0.0.1" \
-        MESA_LOADER_DRIVER_OVERRIDE="kgsl" \
-        TU_DEBUG="noconform" \
-        XDG_SESSION_TYPE="wayland" \
-        QT_QPA_PLATFORM="wayland" \
-        GDK_BACKEND="wayland" \
+    env -i TERM="xterm-256color" \
         chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
-            # 正确设置 XDG_RUNTIME_DIR
-            export XDG_RUNTIME_DIR=\"/run/user/\$(id -u)\"
-            exec dbus-run-session -- bash -c '
-                # 在后台启动 KDE 守护进程，这是关键
-                /usr/bin/kded6 &
-                # 在后台启动 KWin Wayland 合成器，这次重新启用 --xwayland
-                /usr/bin/kwin_wayland --x11-display :${DISPLAY_NUM} --xwayland &
-                # 等待 kwin 启动
-                sleep 2
-                # 在前台启动 Plasma Shell
-                /usr/bin/plasmashell
-            '
-        "
+            export TERM='xterm-256color'
+            # 设置PATH环境变量，包含常用的系统路径
+            export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
+            # 设置临时目录
+            export TMPDIR='/tmp'
+            # 设置显示变量
+            export DISPLAY=:1
+            # 设置PulseAudio服务器地址
+            export PULSE_SERVER='tcp:127.0.0.1:4713'
+            # 设置MESA加载器驱动覆盖为kgsl
+            export MESA_LOADER_DRIVER_OVERRIDE='kgsl'
+            # vulkan驱动需要
+            export TU_DEBUG='noconform'
+            # 设置XDG运行时目录
+            export XDG_RUNTIME_DIR=/run/user/$CHROOT_UID
+            export XDG_SESSION_TYPE='wayland'
+            export GDK_BACKEND='wayland'
+            export SDL_VIDDDRIVER='wayland'
+
+            # 启动系统dbus
+            # dbus-deamon --system
+            sudo service dbus start
+
+            # 启动会话dbus
+            export \$(dbus-launch)
+
+            unset QT_QPA_PLATFORM
+            unset LIBGL_ALWAYS_SOFTWARE
+
+            export QT_QPA_PLATFORMTHEME=KDE
+            export QT_STYLE_OVERRIDE=breeze
+
+
+            # 清除残留kwin
+            killall -SIGABRT kwin_wayland
+            # 启动kwin
+            kwin_wayland --width=2880 --height=1800 --xwayland &
+            sleep 1
+
+            # 使用软件渲染plasmashell
+            export LIBGL_ALWAYS_SOFTWARE=1
+            export QT_QPA_PLATFORM='wayland'
+
+            # 启动 kactivitymanagerd
+            /lib/aarch64-linux-gnu/libexec/kactivitymanagerd &
+
+            plasmashell
+
+            # 清理进程
+            killall -TERM kwin_wayland kactivitymanagerd
+            sudo service dbus stop
+    "
 
     # 6. 退出后清理挂载点
 

@@ -51,6 +51,10 @@ chroot_func(){
         echo "[错误] 此函数必须以 root 权限运行。请使用 'su -c $0'。"
         exit 1
     fi
+
+    # 获取 chroot 内部用户的 UID 和 GID
+    CHROOT_UID=$(chroot "$DEBIANPATH" /usr/bin/id -u "$USERNAME")
+
     # 4. 挂载必要的文件系统
     echo ">>> 步骤 4/5: 准备挂载模式..."
     mount -o remount,dev,suid /data
@@ -86,33 +90,42 @@ chroot_func(){
 
     # 使用 env -i 以干净的环境变量进入 chroot
     # 设置终端类型为支持256色的xterm
-    # 设置PATH环境变量，包含常用的系统路径
-    # 设置临时目录
-    # 设置显示变量
-    # 设置PulseAudio服务器地址
-    # 设置MESA加载器驱动覆盖为kgsl
-    # vulkan驱动需要
-    # 设置XDG运行时目录
-    # 设置XDG会话类型为x11
-    # 设置Qt平台插件为xcb
     env -i \
         TERM="xterm-256color" \
-        PATH="/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games" \
-        TMPDIR="/tmp" \
-        DISPLAY=":1" \
-        PULSE_SERVER="tcp:127.0.0.1" \
-        MESA_LOADER_DRIVER_OVERRIDE="kgsl" \
-        TU_DEBUG="noconform" \
-        XDG_SESSION_TYPE="x11" \
-        QT_QPA_PLATFORM="xcb" \
         chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
-        # --- 进入chroot后的命令 ---
+            # --- 进入chroot后的命令 ---
+            # 设置PATH环境变量，包含常用的系统路径
+            PATH='/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games'
+            # 设置临时目录
+            TMPDIR='/tmp'
+            # 设置显示变量
+            DISPLAY=':1'
+            # 设置PulseAudio服务器地址
+            PULSE_SERVER='tcp:127.0.0.1:4713'
+            # 设置MESA加载器驱动覆盖为kgsl
+            MESA_LOADER_DRIVER_OVERRIDE='kgsl'
+            # vulkan驱动需要
+            TU_DEBUG='noconform'
+            # 设置XDG运行时目录
+            export XDG_RUNTIME_DIR=/run/user/$CHROOT_UID
+            # 设置XDG会话类型为x11
+            XDG_SESSION_TYPE='x11'
+            # 设置Qt平台插件为xcb
+            QT_QPA_PLATFORM='xcb'
 
-        # 用 dbus-launch 启动整个 Xsession。
-        # KDE 会话启动后，会自动根据配置(autostart)拉起 fcitx5。
-        # fcitx5 会自动连接到这个由 dbus-launch 创建的会话总线上。
-        dbus-launch --exit-with-session /etc/X11/Xsession
-    "
+            # 修改 kwinrc 配置文件以禁用特效
+	        kwriteconfig5 --file kwinrc --group Compositing --key Enabled false
+
+            # 用 dbus-launch 启动整个 Xsession。
+            # KDE 会话启动后，会自动根据配置(autostart)拉起 fcitx5。
+            # fcitx5 会自动连接到这个由 dbus-launch 创建的会话总线上。
+            sudo service dbus start
+            export \$(dbus-launch)
+            /etc/X11/Xsession
+
+            # 修改 kwinrc 配置文件以启用特效
+	        # kwriteconfig5 --file kwinrc --group Compositing --key Enabled true
+        "
 
     # 6. 退出后清理挂载点
 
