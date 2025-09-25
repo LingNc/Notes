@@ -26,24 +26,34 @@ if [ ! -d "$DEBIANPATH" ]; then
     echo "[错误] Debian 根目录不存在: $DEBIANPATH"
     exit 1
 fi
+# 获取 chroot 内部用户的 UID 和 GID
+CHROOT_UID=$(su -c chroot "$DEBIANPATH" /usr/bin/id -u "$USERNAME")
 
 echo ">>> 步骤 1/5: 必要性检查成功。"
 
 # 2. 清理旧termux进程
 echo ">>> 步骤 2/5: 清理旧的 Termux 进程..."
 # 因为这个termux x11在进程中是app_process运行的，没办法直接指定termux-x11或者使用一些方法筛选和捕获这个pid也是可以的
-killall -9 app_process pulseaudio
+su -c killall -9 termux-x11 pulseaudio
 
 # 3. 启动Termux侧进程
 echo ">>> 步骤 3/5: 启动 Termux 侧必要进程..."
 echo "    - 启动 X11 服务..."
 # 启动termux-x11
 am start --user 0 -n com.termux.x11/com.termux.x11.MainActivity
-termux-x11 :1 -ac &
+# Also you must set XKB_CONFIG_ROOT environment variable pointing to container's /usr/share/X11/xkb directory,
+# otherwise you will have xkbcomp-related errors.
+export XKB_CONFIG_ROOT=$DEBIANPATH/usr/share/X11/xkb
+su -c setenforce 0
+export TMPDIR=$DEBIANPATH/tmp
+export XDG_RUNTIME_DIR=$DEBIANPATH/run/user/$CHROOT_UID
+export CLASSPATH=$(/system/bin/pm path com.termux.x11 | cut -d: -f2)
+su -c /system/bin/app_process / --nice-name=termux-x11 com.termux.x11.CmdEntryPoint :1 &
+
 sleep 3 # 等待X服务器启动
 echo "    - 启动 pulseaudio 音频服务..."
-pulseaudio --start --exit-idle-time=-1
-pacmd load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
+su -c pulseaudio --start --exit-idle-time=-1
+su -c pacmd load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
 
 chroot_func(){
     # 必要性检查
@@ -51,9 +61,6 @@ chroot_func(){
         echo "[错误] 此函数必须以 root 权限运行。请使用 'su -c $0'。"
         exit 1
     fi
-
-    # 获取 chroot 内部用户的 UID 和 GID
-    CHROOT_UID=$(chroot "$DEBIANPATH" /usr/bin/id -u "$USERNAME")
 
     # 4. 挂载必要的文件系统
     echo ">>> 步骤 4/5: 准备挂载模式..."
@@ -70,9 +77,9 @@ chroot_func(){
     # 创建一个共享内存空间指定大小，有很多程序要使用，如Electron APPS需要/dev/shm
     mkdir -p "${DEBIANPATH}/dev/shm"
     mount -t tmpfs -o size=1G tmpfs "${DEBIANPATH}/dev/shm"
-    # 挂载Termux的tmp目录
+    # 不需要挂载Termux的tmp目录
     mkdir -p "${DEBIANPATH}/tmp"
-    mount --bind /data/data/com.termux/files/usr/tmp "${DEBIANPATH}/tmp"
+    # mount --bind /data/data/com.termux/files/usr/tmp "${DEBIANPATH}/tmp"
     # 确保tmp目录权限正确
     chmod 1777 "${DEBIANPATH}/tmp"
     # 只读挂载 /system 使用一些原生的安卓指令
@@ -102,12 +109,18 @@ chroot_func(){
             DISPLAY=':1'
             # 设置PulseAudio服务器地址
             PULSE_SERVER='tcp:127.0.0.1:4713'
+            LD_LIBRARY_PATH='/usr/lib/aarch64-linux-gnu/'
+            VK_DRIVER_FILES='/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json'
+            OCL_ICD_VENDORS='/usr/local/etc/OpenCL/vendors/mesa.icd'
+            # MESA_VK_WSI_PRESENT_MODE=mailbox
             # 设置MESA加载器驱动覆盖为kgsl
             MESA_LOADER_DRIVER_OVERRIDE='kgsl'
             # vulkan驱动需要
             TU_DEBUG='noconform'
             # 设置XDG运行时目录
             export XDG_RUNTIME_DIR=/run/user/$CHROOT_UID
+            # 设置媒体管理
+            export PIPEWIRE_RUNTIME_DIR=/run/user/$CHROOT_UID
             # 设置XDG会话类型为x11
             XDG_SESSION_TYPE='x11'
             # 设置Qt平台插件为xcb
@@ -121,7 +134,13 @@ chroot_func(){
             # fcitx5 会自动连接到这个由 dbus-launch 创建的会话总线上。
             sudo service dbus start
             export \$(dbus-launch)
-            /etc/X11/Xsession
+
+            wireplumber &
+            /usr/bin/pipewire &
+            /usr/bin/pipewire-pulse &
+
+            startplasma-x11
+            # /etc/X11/Xsession
 
             # 修改 kwinrc 配置文件以启用特效
 	        # kwriteconfig5 --file kwinrc --group Compositing --key Enabled true
@@ -192,7 +211,7 @@ chroot_func(){
     # 依次卸载所有挂载的文件系统
     # umount "${DEBIANPATH}/apex"
     # umount "${DEBIANPATH}/system"
-    umount "${DEBIANPATH}/tmp"
+    # umount "${DEBIANPATH}/tmp"
     umount "${DEBIANPATH}/dev/shm"
     umount "${DEBIANPATH}/dev/pts"
     umount "${DEBIANPATH}/sys"
@@ -216,6 +235,7 @@ export USERNAME='$USERNAME'
 export GRACE_PERIOD='$GRACE_PERIOD'
 export CONFIRM_TIMEOUT='$CONFIRM_TIMEOUT'
 export PATH='$PATH'
+export CHROOT_UID='$CHROOT_UID'
 
 $(declare -f chroot_func)
 
@@ -225,6 +245,6 @@ EOF
 # 4. 终止Termux的服务进程
 echo ">>> 步骤 4/4: 终止 Termux 侧服务进程..."
 echo "    - 正在终止 Termux X11 服务..."
-pkill -TERM app_process
+su -c killall -TERM termux-x11
 echo "    - 正在终止 pulseaudio 服务..."
-pkill -TERM pulseaudio
+su -c killall -TERM pulseaudio

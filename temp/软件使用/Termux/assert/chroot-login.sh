@@ -11,10 +11,10 @@ export PATH="/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr
 # --- 请在这里配置您的变量 ---
 
 # 1. Chroot 根目录的完整路径
-DEBIANPATH="/data/data/com.termux/files/home/debian-prootfs"
+DEBIANPATH="/data/data/com.termux/files/home/debian-rootfs"
 
 # 2. 您想默认登录的普通用户名
-USERNAME="lingnc"
+USERNAME="user"
 
 # --------------------------- 脚本主体 ---------------------------- #
 
@@ -36,9 +36,9 @@ mount_filesystems() {
     # 确保目录存在
     mkdir -p "${DEBIANPATH}/dev/shm"
     mount -t tmpfs -o size=1G tmpfs "${DEBIANPATH}/dev/shm"
-    # 挂载Termux的tmp目录
+    # 不必挂载Termux的tmp目录
     mkdir -p "${DEBIANPATH}/tmp"
-    mount --bind /data/data/com.termux/files/usr/tmp "${DEBIANPATH}/tmp"
+    # mount --bind /data/data/com.termux/files/usr/tmp "${DEBIANPATH}/tmp"
     # 确保tmp目录权限正确
     chmod 1777 "${DEBIANPATH}/tmp"
     # 只读挂载 /system 使用一些原生的安卓指令
@@ -55,7 +55,7 @@ umount_filesystems() {
     # 依次卸载所有挂载的文件系统
     # umount "${DEBIANPATH}/apex"
     # umount "${DEBIANPATH}/system"
-    umount "${DEBIANPATH}/tmp"
+    # umount "${DEBIANPATH}/tmp"
     umount "${DEBIANPATH}/dev/shm"
     umount "${DEBIANPATH}/dev/pts"
     umount "${DEBIANPATH}/sys"
