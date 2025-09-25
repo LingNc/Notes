@@ -10,7 +10,7 @@ export PATH="/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/usr
 # --- 请在这里配置您的变量 ---
 
 # 1. Chroot 根目录的完整路径
-DEBIANPATH="/data/data/com.termux/files/home/debian-rootfs"
+DEBIANPATH="$HOME/debian-rootfs"
 # 2. 您想默认登录的普通用户名
 USERNAME="user"
 # 3. 终止程序的等待时间（秒）
@@ -100,31 +100,32 @@ chroot_func(){
     env -i \
         TERM="xterm-256color" \
         chroot "$DEBIANPATH" /bin/su - "${USERNAME}" --login -c "
+            export TERM='xterm-256color'
             # --- 进入chroot后的命令 ---
             # 设置PATH环境变量，包含常用的系统路径
-            PATH='/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games'
+            export PATH='/usr/local/sbin:/usr/local/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/games:/usr/local/games'
             # 设置临时目录
-            TMPDIR='/tmp'
+            export TMPDIR='/tmp'
             # 设置显示变量
-            DISPLAY=':1'
+            export DISPLAY=':1'
             # 设置PulseAudio服务器地址
-            PULSE_SERVER='tcp:127.0.0.1:4713'
-            LD_LIBRARY_PATH='/usr/lib/aarch64-linux-gnu/'
-            VK_DRIVER_FILES='/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json'
-            OCL_ICD_VENDORS='/usr/local/etc/OpenCL/vendors/mesa.icd'
+            export PULSE_SERVER='tcp:127.0.0.1:4713'
+            export LD_LIBRARY_PATH='/usr/lib/aarch64-linux-gnu/'
+            export VK_DRIVER_FILES='/usr/share/vulkan/icd.d/freedreno_icd.aarch64.json'
+            export OCL_ICD_VENDORS='/usr/local/etc/OpenCL/vendors/mesa.icd'
             # MESA_VK_WSI_PRESENT_MODE=mailbox
             # 设置MESA加载器驱动覆盖为kgsl
-            MESA_LOADER_DRIVER_OVERRIDE='kgsl'
+            export MESA_LOADER_DRIVER_OVERRIDE='kgsl'
             # vulkan驱动需要
-            TU_DEBUG='noconform'
+            export TU_DEBUG='noconform'
             # 设置XDG运行时目录
             export XDG_RUNTIME_DIR=/run/user/$CHROOT_UID
             # 设置媒体管理
             export PIPEWIRE_RUNTIME_DIR=/run/user/$CHROOT_UID
             # 设置XDG会话类型为x11
-            XDG_SESSION_TYPE='x11'
+            export XDG_SESSION_TYPE='x11'
             # 设置Qt平台插件为xcb
-            QT_QPA_PLATFORM='xcb'
+            export QT_QPA_PLATFORM='xcb'
 
             # 修改 kwinrc 配置文件以禁用特效
 	        kwriteconfig5 --file kwinrc --group Compositing --key Enabled false
