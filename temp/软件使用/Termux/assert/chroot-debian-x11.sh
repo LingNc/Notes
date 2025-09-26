@@ -182,7 +182,7 @@ chroot_func(){
             echo "    - 以下顽固进程未能在优雅退出期间终止："
 
             # 使用 ps 命令显示进程的 PID 和名称，更直观
-            ps -o pid,comm -p $(echo ${STUBBORN_PIDS} | tr '\n' ' ') | sed
+            ps -o pid,comm -p $(echo ${STUBBORN_PIDS} | tr '\n' ' ')
 
             echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             echo ""
