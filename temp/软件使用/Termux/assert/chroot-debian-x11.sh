@@ -34,7 +34,8 @@ echo ">>> 步骤 1/5: 必要性检查成功。"
 # 2. 清理旧termux进程
 echo ">>> 步骤 2/5: 清理旧的 Termux 进程..."
 # 因为这个termux x11在进程中是app_process运行的，没办法直接指定termux-x11或者使用一些方法筛选和捕获这个pid也是可以的
-su -c killall -9 termux-x11 pulseaudio
+su -c killall -9 termux-x11
+killall -9 pulseaudio
 
 # 3. 启动Termux侧进程
 echo ">>> 步骤 3/5: 启动 Termux 侧必要进程..."
@@ -52,8 +53,9 @@ su -c /system/bin/app_process / --nice-name=termux-x11 com.termux.x11.CmdEntryPo
 
 sleep 3 # 等待X服务器启动
 echo "    - 启动 pulseaudio 音频服务..."
-su -c pulseaudio --start --exit-idle-time=-1
-su -c pacmd load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
+# 因为pulseaudio在root下启动会有问题，所以这里不使用su -c，并且不需要指定XDG到chroot中因为在chroot中是使用tcp来链接的
+env XDG_RUNTIME_DIR=$PREFIX/tmp pulseaudio --start --exit-idle-time=-1
+env XDG_RUNTIME_DIR=$PREFIX/tmp pacmd load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
 
 chroot_func(){
     # 必要性检查
@@ -248,4 +250,4 @@ echo ">>> 步骤 4/4: 终止 Termux 侧服务进程..."
 echo "    - 正在终止 Termux X11 服务..."
 su -c killall -TERM termux-x11
 echo "    - 正在终止 pulseaudio 服务..."
-su -c killall -TERM pulseaudio
+killall -TERM pulseaudio
