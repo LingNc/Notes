@@ -1,0 +1,184 @@
+Title: 高通平台下Termux Chroot/Proot容器实现全局硬件加速的笔记 - 哔哩哔哩
+
+URL Source: https://www.bilibili.com/opus/1042342069764358179?plat_id=5&share_from=article&share_medium=android&share_plat=android&share_session_id=267ddb80-f0aa-43eb-ba49-aef61e2e2d0c&share_source=COPY&share_tag=s_i&spmid=dt.opus-detail.0.0&timestamp=1754956100&unique_k=1eBfRK5
+
+Markdown Content:
+UP 接触 Termux 这款强大的 Android 虚拟终端大概已有两年半，虽相关的学习多浮于表面，但仍摸索了一些玩法，利用它运行 Linux 容器便是其中之一。由于相关的知识技巧比较零碎，故总结了这篇笔记，记录一下关键步骤和常见问题的解决办法，后面如果解决了什么新的问题也会更新在这里。
+
+Tips: 本文仅涉及使用 Termux 运行**原生 arm64 架构的 Linux 容器**，不涉及跨架构模拟、图形 API 转译等内容（Windows 游戏转译可以选择 Winlator、Mobox 等）。
+
+![Image 1: cut-off](https://article.biliimg.com/bfs/article/4adb9255ada5b97061e610b682b8636764fe50ed.png)
+Termux 利用 TMOE 部署 Linux 容器的教程很多，这里就不在赘述。UP 部署时选的是 Debian 12 的 Chroot 容器，安装了 KDE Plasma 桌面。没 Root 的话也可以选择 Proot 容器，应该也可以使用（UP 在骁龙888的 Proot 容器上测试成功）。
+
+如果是 Android 12 及以上版本的系统，需要解除单个应用的多线程限制，在 TMOE 里可以快捷设置。
+
+![Image 2](https://i0.hdslb.com/bfs/new_dyn/watermark/3b56140aebc505f89419cf20dc0e8505365759775.jpg@1192w.webp)
+
+安装 Linux 容器过程中可以不安装 vnc 服务（性能不太行），因为本文用的是 Termux:X11 连接容器内的桌面环境。KDE Plasma 桌面环境在**容器内**使用 TMOE 安装即可。安装完成后需要挂载 tmp，关闭容器后在**容器外**的 TMOE 进行操作。
+
+![Image 3](https://i0.hdslb.com/bfs/new_dyn/watermark/d5a7c77d98c44ad2983c90da4a3d88bc365759775.jpg@1192w.webp)
+
+![Image 4](https://i0.hdslb.com/bfs/new_dyn/watermark/a73fbdfd24bbfd80c07785860e9963e0365759775.jpg@1192w.webp)
+
+![Image 5: cut-off](https://article.biliimg.com/bfs/article/71bf2cd56882a2e97f8b3477c9256f8b09f361d3.png)
+**二、Termux:X11 配置**
+-------------------
+
+安装 Termux:X11 后，建议先设置 Preferences。若连接键鼠使用，建议修改图中橙色方框中的选项为图中所示配置；若需要在 Linux 容器中正常使用 Alt + Tab 等快捷键，需要在安卓设置中打开 Termux:X11 的无障碍服务，如图中绿色方框中所示。
+
+![Image 6](https://i0.hdslb.com/bfs/new_dyn/watermark/e4890efdeab802d1681275e927707c68365759775.jpg@1192w.webp)
+
+![Image 7](https://i0.hdslb.com/bfs/new_dyn/watermark/2e6f62a06f8daf3035b35b003cd83a3e365759775.jpg@1192w.webp)
+
+![Image 8](https://i0.hdslb.com/bfs/new_dyn/watermark/69cbb7d7cbf09b9d40155bf06eb14d19365759775.jpg@1192w.webp)
+
+设置好后在 Termux 中安装 X11 和 tur 社区源。
+
+pkg install x11-repo tur-repo -y
+
+安装好后可以通过 termux-change-repo 命令更换国内的软件源以加快下载速度，然后安装连接 Termux:X11 和硬件加速相关的软件包。
+
+pkg update && pkg upgrade -y
+
+pkg install termux-x11-nightly mesa-zink vulkan-loader-android -y
+
+![Image 9: cut-off](https://article.biliimg.com/bfs/article/71bf2cd56882a2e97f8b3477c9256f8b09f361d3.png)
+**三、Linux 容器配置**
+----------------
+
+在容器外，先启动 termux-x11 服务，再启动容器，可以参考以下脚本：
+
+#!/bin/bash
+
+termux-x11 :2 -dpi 96 &
+
+tmoe ls
+
+进入容器后，不要启动 KDE 桌面会话，先使用 vim 等工具编辑~/.config/kwinrc 文件（若用户目录下 .config 文件夹不存在需要先新建），禁用 KDE 的桌面特效，在 [Compositing] 部分添加或修改以下内容：
+
+[Compositing]
+
+Enabled=false
+
+然后安装相关驱动及工具（假设安装的是 Debian 系的 Linux 发行版）：
+
+sudo apt update && sudo apt upgrade -y
+
+sudo apt install wget mesa-utils vulkan-tools -y
+
+sudo apt purge mesa-vulkan-drivers -y
+
+wget https://github.com/sabamdarif/termux-desktop/releases/download/mesa-vulkan/mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
+
+sudo apt install ./mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb -y
+
+sudo apt-mark hold mesa-vulkan-drivers:arm64
+
+rm ./mesa-vulkan-kgsl_24.1.0-devel-20240120_arm64.deb
+
+注意：若手机的 SoC 为骁龙 8 Gen 3 等，则上面的驱动可能无法使用，可以将 mesa-vulkan-kgsl_24.1.0-devel-**20240120**_arm64.deb 替换为 mesa-vulkan-kgsl_24.1.0-devel-**20240324**_arm64.deb，后者可以前往此链接下载：https://github.com/xDoge26/proot-setup/issues/26#issuecomment-2043153927
+
+使用 root 权限修改 /etc/profile 文件，在文件末尾添加以下的两行内容，设置 XDG_RUNTIME_DIR （该环境变量在正常的 Linux 系统上由 systemd 自动设置，但当宿主系统为 Android 时，Linux 容器应该无法使用 systemd，故需手动设置）和 DISPLAY （与上面启动 termux-x11 服务命令的“:2”相对应）全局环境变量：
+
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+export DISPLAY=':2'
+
+使环境变量生效：
+
+source /etc/profile
+
+创建目录：
+
+sudo mkdir -p /run/user/$(id -u)
+
+sudo chown $USER:$USER /run/user/$(id -u)
+
+chmod 700 /run/user/$(id -u)
+
+修改 /tmp 目录的权限，避免出现因权限问题导致的桌面会话启动失败的问题：
+
+sudo chmod -R 777 /tmp
+
+使用以下命令启动 KDE Plasma 的 X11 会话：
+
+sudo service dbus start
+
+MESA_LOADER_DRIVER_OVERRIDE=zink TU_DEBUG=noconform /etc/X11/xinit/Xsession
+
+若不希望进入桌面会话时自动启动终端，可以编辑 /etc/X11/xinit/Xsession 文件，将 open_terminal 这行注释掉。
+
+切换到 Termux:X11 应用（注意防止 Termux 掉后台）：
+
+![Image 10](https://i0.hdslb.com/bfs/new_dyn/watermark/8be6d6c66d7572f814eb20b91618eb88365759775.jpg@1192w.webp)
+
+![Image 11](https://i0.hdslb.com/bfs/new_dyn/watermark/5a4bf206661499874e36c3730184562b365759775.jpg@1192w.webp)
+
+![Image 12](https://i0.hdslb.com/bfs/new_dyn/watermark/f73b40d59d191fb73e493793e06da271365759775.jpg@1192w.webp)
+
+若图标、字体等元素太小，可以在显示设置中调整缩放倍数。调整后点击“应用”不会立即生效，需要注销后切回到 Termux 按 Enter 或 Ctrl + C 键结束 KDE 会话，然后使用前面的命令再次启动 KDE Plasma 的 X11 会话。
+
+![Image 13: cut-off](https://article.biliimg.com/bfs/article/71bf2cd56882a2e97f8b3477c9256f8b09f361d3.png)
+**四、常见问题**
+----------
+
+**1. 安装 fcitx 5 和拼音输入法**
+------------------------
+
+sudo apt install fcitx5 fcitx5-pinyin -y
+
+**2.在 Chromium、VS Code 等“浏览器套壳”应用无法激活 fcitx 5 输入法**
+---------------------------------------------------
+
+按照本文的启动命令启动 KDE Plasma 一般不会出现此问题，若仍出现此问题，可尝试使用 root 权限修改 /etc/environment 文件，添加以下的四行内容：
+
+GTK_IM_MODULE=fcitx
+
+QT_IM_MODULE=fcitx
+
+XMODIFIERS=@im=fcitx
+
+SDL_IM_MODULE=fcitx
+
+注销用户，切回到 Termux 按 Enter 或 Ctrl + C 键结束 KDE 会话，然后使用前面的命令再次启动 KDE Plasma 的 X11 会话。
+
+（由于改进了 KDE Plasma 的启动命令，以下方法不再适用）
+
+> ~~在相应的应用启动器的属性里添加以下环境变量：~~
+
+> ~~GTK_IM_MODULE=xim QT_IM_MODULE=xim XMODIFIERS=@im=fcitx~~
+
+> ~~使用该办法后输入法候选框的位置会偏移输入框，打字速度快了还会“漏字母”（比如使用拼音输入法时个别字母会提前上屏导致原本正确的拼音残缺），但 UP 暂时没找到更好的解决方法。~~
+
+**3.一些应用程序调用 KDE 桌面的接口打开****文件夹****时，只能打开****文件**
+-------------------------------------------------
+
+这个疑似是 arm64 架构独有的 KDE 桌面问题，可以先将要选择的文件夹改为其他名称，然后再新建一个**与文件夹原名称同名的空文件**，选择完成后再删除空文件，将文件夹的名称改回来。
+
+注意：请**谨慎修改系统文件夹**（如 /usr/bin 等）的名称，以免出现不可预知的问题。
+
+**4.使用较新版本的 Termux:X11 时，默认使用 Android 输入法，而不是容器内的输入法**
+------------------------------------------------------
+
+开启 Termux:X11 Preferences 的 **Keyboard -> Enforce char based input** 选项。
+
+![Image 14: cut-off](https://article.biliimg.com/bfs/article/4adb9255ada5b97061e610b682b8636764fe50ed.png)
+**【相关资源】**
+----------
+
+*   Termux：https://github.com/termux/termux-app/releases
+*   Termux:X11：https://github.com/termux/termux-x11/releases
+*   TMOE 文档：https://doc.tmoe.me/zh/
+*   Arch Linux 中文维基：https://wiki.archlinuxcn.org/wiki/
+
+**【参考资料】**
+----------
+
+*   https://gitee.com/mo2/linux/issues/IAZWYG
+*   https://github.com/LinuxDroidMaster/Termux-Desktops/blob/main/Documentation/HardwareAcceleration.md
+*   https://github.com/sabamdarif/termux-desktop/blob/main/hw-acceleration.md
+*   https://www.reddit.com/r/termux/comments/1g799ey/i_cant_control_minecraft_in_termuxx11_with_mouse/
+*   https://www.reddit.com/r/termux/comments/19dpqas/proot_linux_only_dri3_patch_mesa_turnip_driver/
+*   https://blog.csdn.net/wyw1749750673/article/details/144372483
+
+![Image 15: cut-off](https://article.biliimg.com/bfs/article/02db465212d3c374a43c60fa2625cc1caeaab796.png)

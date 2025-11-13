@@ -1,0 +1,273 @@
+turnip zink打上dri3补丁后运行kde plasma wayland，十分丝滑，性能提升9倍
+2443
+0
+2023-08-21 10:59:39
+未经作者授权，禁止转载
+https://github.com/termux/termux-packages/pull/17561
+安装
+演示
+教程
+电脑
+性能
+提升
+补丁
+
+
+《凡人修仙传》热播中！韩立抵达付家堡
+评论
+66
+  
+
+天青色等烟雨，评论区在等你
+
+kde-yyds
+
+
+@桂树2018 @YOO-Studio @林迟2023 @synchro类鱼体 [doge]
+2023-08-21 11:01
+
+7
+
+回复
+
+林迟2023
+
+ 太厉害了。可惜我不是骁龙[doge][doge]
+2023-08-21 15:55
+
+2
+
+回复
+
+kde-yyds
+
+
+ 回复 @林迟2023 :试试panfrost，有内核模块可以加载，加载了就能用（理论上[doge][doge][doge][doge][doge]）
+2023-08-21 15:57
+
+3
+
+回复
+共7条回复，
+
+iPupil
+
+看了UP几个视频才发现到Wayland原生支持OpenGL ES，而Freedreno作为Mesa项目针对Adreno GPU的开源驱动实现，包含了Turnip (Vulkan)、OpenGL ES和OpenGL等驱动，这样就不需要用Zink将OpenGL转为Vulkan再调用Turnip了。再加之Wayland本身性能比X11高很多，即使再套一层X11，也比Turnip+Zink+X11的效率高（
+2025-07-19 10:48
+
+3
+
+回复
+UP主觉得很赞
+关注的人
+
+iPupil
+
+ 不过Nvidia的驱动对Wayland的支持真不行，用个Edge都会闪屏。如果用AMD集显或混合显示对外接显示器、屏幕亮度调节的支持也不好，PC不得不使用X11。反倒是Android这些容器方案对Wayland的支持还行…
+2025-07-19 10:55
+
+
+回复
+
+kde-yyds
+
+
+ 回复 @iPupil :我笔记本是680m核显的，wayland上多显示器体验挺好的，亮度可以分别调节，缩放也可以调不一样的，hdr也能全开，外接低分辨率的也能在保持内置屏幕分辨率的情况下复制输出，没啥问题的
+2025-07-19 11:31
+
+1
+
+回复
+
+iPupil
+
+ 回复 @kde-yyds :后面试试，只开核显我之前貌似只试过X11的情况，只开独显在X11下甚至内置屏幕缩放最低只能设置150%（
+2025-07-19 11:48
+
+1
+
+回复
+
+kde-yyds
+
+
+ 回复 @iPupil :x11还是太古老了
+2025-07-19 12:07
+
+
+回复
+
+Blue_Beaker
+
+怎么在有data加密的情况下让chroot容器使用termux x11？直接挂载tmp目录说无法解码。
+2023-10-19 15:59
+
+3
+
+回复
+UP主觉得很赞
+
+kde-yyds
+
+
+ data加密是啥
+2023-10-19 22:47
+
+
+回复
+
+Blue_Beaker
+
+ 回复 @kde-yyds :高版本安卓默认的data分区加密，这种情况下将加密的文件夹直接bind挂载进chroot文件系统，尝试访问里面的文件会说未找到所需的密钥
+2023-10-19 23:36
+
+1
+
+回复
+
+kde-yyds
+
+
+ 回复 @Blue_Beaker : 离谱，不过我的miui14（android13）没加密
+2023-10-20 17:10
+
+
+回复
+
+Blue_Beaker
+
+ 回复 @kde-yyds :我的lineageOS19（android12）刷上开机就加密，twrp都没法解密了，刷包都得插u盘[辣眼睛]
+不过linux deploy倒是能用，我装了个debian11容器把termux的.x11-unix文件挂载过去之后完美使用termux-x11，比xsdl好多了
+然而又产生了新的问题，容器内只有root用户可以联网和访问sdcard[笑哭]下文件都得sudo[笑哭]
+2023-10-20 20:43
+
+1
+
+回复
+
+kde-yyds
+
+
+ 回复 @Blue_Beaker : 咋sudo的，我的/data没有setuid，su和sudo用不了
+2023-10-22 08:57
+
+
+回复
+
+Blue_Beaker
+
+ 回复 @kde-yyds :我用的linux deploy装的容器，sudo能用，但这软件太老，最高只能装到debian11,12装不上
+2023-10-22 14:09
+
+1
+
+回复
+
+Blue_Beaker
+
+ 回复 @Blue_Beaker :然后我把容器内普通用户的uid改成容器外termux的uid并给予相应组，就能联网和访问sdcard了，但语言变成英文[笑哭]（原本容器装上就是中文）
+2023-10-22 14:12
+
+
+回复
+
+kde-yyds
+
+
+ 回复 @Blue_Beaker :可以更新吧
+2023-10-22 16:41
+
+
+回复
+
+Blue_Beaker
+
+ 回复 @kde-yyds :没尝试过，但直接装stable也就是12会在某个软件包处出错
+2023-10-22 19:14
+
+1
+
+回复
+
+peasoft
+
+ 回复 @Blue_Beaker : groupadd -g 1015 aid_sdcard_rw
+groupadd -g 1035 aid_sdcard_all
+groupadd -g 3001 aid_net_bt_admin
+groupadd -g 3002 aid_net_bt
+groupadd -g 3003 aid_inet
+groupadd -g 3004 aid_net_raw
+groupadd -g 3005 aid_net_admin
+usermod -g aid_inet -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin -a _apt
+usermod -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin -a 要联网的用户
+要sdcard的用户同理加入上面的sdcard组
+2024-08-15 10:36
+
+
+回复
+共2页
+
+繁星战队风雪
+
+建议lxc容器玩有完整的systemd，效率比chroot强
+2023-11-13 17:41
+
+6
+
+回复
+UP主觉得很赞
+
+吾乃精污小花
+
+请问up主wayland是用weston实现的吗？以及我也用chroot，但使用turnip-zink加速kwin之后窗口黑屏，请问有解决办法吗[脱单doge]
+2025-02-09 17:05
+
+4
+
+回复
+UP主觉得很赞
+
+kde-yyds
+
+
+ 是kwin_wayland
+2025-02-09 19:03
+
+2
+
+回复
+
+吾乃精污小花
+
+ 回复 @kde-yyds :多谢提示！但是不知道该如何让应用显示在kwin_wayland上，并且kwin_wayland的窗口不显示，也没法将kwin_wayland的窗口全屏[笑哭]
+2025-02-09 20:17
+
+1
+
+回复
+
+kde-yyds
+
+
+ 回复 @吾乃精污小花 :1. export QT_QPA_PLATFORM=wayland
+2. kwin_wayland加参数 --width= --height=
+2025-02-09 21:00
+
+2
+
+回复
+
+吾乃精污小花
+
+ 回复 @kde-yyds :谢谢up主，弄成了，但在wayland下启动的软件又吃不到GPU加速了，会报错libEGL warning: wayland-egl: could not open zink (No such file or directory)。并且除了kde自带软件，其他软件窗口都拖不动，并且挺容易崩溃黑屏，不过好在kwin的特效终于流畅起来了[笑哭]
+2025-02-09 21:42
+
+2
+
+回复
+
+kde-yyds
+
+
+ 回复 @吾乃精污小花 :用freedreno。那个在wayland client也能吃到
+2025-02-09 21:57
