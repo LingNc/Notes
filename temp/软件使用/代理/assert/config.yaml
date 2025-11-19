@@ -1,0 +1,38 @@
+services:
+  # ==========================================
+  # 1. Shadowsocks 服务 (推荐用于公网)
+  # ==========================================
+  # SS - TCP 监听
+  - name: ss-tcp
+    addr: :9000
+    handler:
+      type: ss
+      auth:
+        username: chacha20-ietf-poly1305  # 加密方式
+        password: "MyStrongSSPassword"  # 【请修改】SS的连接密码
+    listener:
+      type: tcp
+
+  # SS - UDP 监听 (与上面端口一致)
+  - name: ss-udp
+    addr: :9000
+    handler:
+      type: ss
+      auth:
+        username: chacha20-ietf-poly1305  # 加密方式
+        password: "MyStrongSSPassword"  # 【请修改】必须和上面完全一致
+    listener:
+      type: udp
+
+  # ==========================================
+  # 2. SOCKS5 服务 (推荐用于局域网)
+  # ==========================================
+  - name: socks5-service
+    addr: :9001
+    handler:
+      type: socks5
+      auth:
+        username: myuser      # 【请修改】SOCKS5 用户名
+        password: mypassword  # 【请修改】SOCKS5 密码
+    listener:
+      type: tcp
