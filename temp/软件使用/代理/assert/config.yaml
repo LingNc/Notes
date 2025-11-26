@@ -9,7 +9,7 @@ services:
       type: ss
       auth:
         username: chacha20-ietf-poly1305  # 加密方式
-        password: "MyStrongSSPassword"  # 【请修改】SS的连接密码
+        password: MyStrongSSPassword  # 【请修改】SS的连接密码
     listener:
       type: tcp
 
@@ -20,7 +20,7 @@ services:
       type: ss
       auth:
         username: chacha20-ietf-poly1305  # 加密方式
-        password: "MyStrongSSPassword"  # 【请修改】必须和上面完全一致
+        password: MyStrongSSPassword  # 【请修改】必须和上面完全一致
     listener:
       type: udp
 
