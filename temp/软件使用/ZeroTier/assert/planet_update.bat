@@ -135,14 +135,40 @@ exit /b 0
     :: 设置临时文件名
     set "TEMP_FILE=%TEMP%\zerotier-planet-%TIMESTAMP%"
     
-    :: 下载文件
-    echo 正在从 %DOWNLOAD_URL% 下载文件...
-    powershell -Command "try { (New-Object System.Net.WebClient).DownloadFile('%DOWNLOAD_URL%', '%TEMP_FILE%'); exit 0; } catch { exit 1; }"
-    if %errorLevel% neq 0 (
-        echo 下载文件失败。请检查URL和网络连接。
-        if exist "%TEMP_FILE%" del "%TEMP_FILE%" 2>nul
+    :: --- 修改开始: 使用 curl 或 certutil 替代 powershell ---
+    
+    :: 方法1: 尝试使用 curl (Win10/11 自带)
+    where curl >nul 2>&1
+    if %errorLevel% equ 0 (
+        echo 正在使用系统自带 Curl 下载...
+        curl -L -o "%TEMP_FILE%" "%DOWNLOAD_URL%"
+        if %errorLevel% neq 0 (
+            echo Curl 下载失败，尝试使用 Certutil...
+            goto :try_certutil
+        ) else (
+            goto :verify_download
+        )
+    )
+
+    :try_certutil
+    :: 方法2: 尝试使用 certutil (兼容旧版 Windows)
+    where certutil >nul 2>&1
+    if %errorLevel% equ 0 (
+        echo 正在使用 Certutil 下载...
+        rem -urlcache -split -f 是强制下载并覆盖
+        certutil -urlcache -split -f "%DOWNLOAD_URL%" "%TEMP_FILE%" >nul
+        if %errorLevel% neq 0 (
+            echo Certutil 下载失败。
+            del "%TEMP_FILE%" 2>nul
+            exit /b 1
+        )
+    ) else (
+        echo 错误: 系统未找到 curl 或 certutil 工具，无法下载。
         exit /b 1
     )
+    
+    :verify_download
+    :: --- 修改结束 ---
     
     :: 检查文件是否为空
     for %%F in ("%TEMP_FILE%") do if %%~zF==0 (

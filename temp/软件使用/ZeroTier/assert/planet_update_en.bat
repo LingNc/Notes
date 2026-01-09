@@ -135,22 +135,45 @@ exit /b 0
     :: Set temporary file name
     set "TEMP_FILE=%TEMP%\zerotier-planet-%TIMESTAMP%"
     
-    :: Download file
-    echo Downloading file from %DOWNLOAD_URL% ...
-    powershell -Command "try { (New-Object System.Net.WebClient).DownloadFile('%DOWNLOAD_URL%', '%TEMP_FILE%'); exit 0; } catch { exit 1; }"
-    if %errorLevel% neq 0 (
-        echo Download file failed. Please check URL and network connection.
-        if exist "%TEMP_FILE%" del "%TEMP_FILE%" 2>nul
+    :: --- Prefer curl/certutil before falling back to Powershell ---
+    :: Method 1: use bundled curl (available on Win10/11)
+    where curl >nul 2>&1
+    if %errorLevel% equ 0 (
+        echo Downloading via system curl...
+        curl -L -o "%TEMP_FILE%" "%DOWNLOAD_URL%"
+        if %errorLevel% neq 0 (
+            echo Curl download failed, attempting Certutil...
+            goto :try_certutil
+        ) else (
+            goto :verify_download
+        )
+    )
+
+    :try_certutil
+    :: Method 2: use certutil (built into all Windows)
+    where certutil >nul 2>&1
+    if %errorLevel% equ 0 (
+        echo Downloading via Certutil...
+        rem -urlcache -split -f is recommended for larger downloads
+        certutil -urlcache -split -f "%DOWNLOAD_URL%" "%TEMP_FILE%" >nul
+        if %errorLevel% neq 0 (
+            echo Certutil download failed.
+            del "%TEMP_FILE%" 2>nul
+            exit /b 1
+        )
+    ) else (
+        echo Error: System lacks curl and certutil, unable to download the file.
         exit /b 1
     )
-    
-    :: Check if file is empty
+
+    :verify_download
+    :: Confirm the downloaded file is not empty
     for %%F in ("%TEMP_FILE%") do if %%~zF==0 (
         echo Error: Downloaded file is empty!
         del "%TEMP_FILE%" 2>nul
         exit /b 1
     )
-    
+
     echo Download file completed.
     exit /b 0
 
